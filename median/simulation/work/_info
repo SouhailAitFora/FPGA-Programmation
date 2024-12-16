@@ -1,10 +1,37 @@
 m255
 K4
 z2
+!s11f vlog 2023.2_1 2023.05, May 12 2023
 13
 !s112 1.1
 !i10d 8192
 !i10e 25
 !i10f 100
 cModel Technology
-d/cal/exterieurs/saitfora-23/2A/SE/souhail-ait-fora/median/simulation
+Z0 d/cal/exterieurs/saitfora-23/2A/SE/souhail-ait-fora/median/simulation
+vMCE
+2../src/MCE.sv
+DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
+!s110 1734363515
+!i10b 1
+!s100 @E7;WZ5lDg9Y93IOkiYUX0
+Imd;^DnjkjV=Uf0kW_4;]G3
+S1
+R0
+w1734363249
+8../src/MCE.sv
+F../src/MCE.sv
+!i122 0
+L0 1 11
+VDg1SIo80bB@j0V0VzS_@n1
+OL;L;2023.2_1;77
+r1
+!s85 0
+31
+!s108 1734363514.000000
+!s107 ../src/MCE.sv|
+!s90 +acc|../src/MCE.sv|
+!i113 0
+o+acc -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+tCvgOpt 0
+n@m@c@e
