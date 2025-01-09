@@ -6,33 +6,28 @@ module MED #(parameter WIDTH = 8 , N_PIXELS = 9)
              output logic [WIDTH-1:0] DO);
 
 logic [WIDTH-1:0] regs [N_PIXELS-1:0];
-logic [WIDTH-1:0] A,B,MAX,MIN
+logic [WIDTH-1:0] A,B,MAX,MIN ;
 
 assign O_MUX1 = DSI ? DI : MIN ;
 
-assign O_MUX2 = BYP ? reg [N_PIXELS-2] : MAX; 
+assign O_MUX2 = BYP ? regs[N_PIXELS-2] : MAX ; 
 
-assign A  = [N_PIXELS-1] ; 
+assign A  = regs[N_PIXELS-1] ;
 
-assign B = [N_PIXELS-2] ;
+assign B = regs[N_PIXELS-2] ;
+
+assign DO = regs[N_PIXELS-1];
 
 MCE #(.WIDTH(WIDTH)) I_MCE(.A(A), .B(B), .MAX(MAX), .MIN(MIN));
 
-always_ff@(CLK posedge) 
+always_ff @(posedge CLK) 
 begin
-    reg[0] <= O_MUX1 ; 
-    for( i = 0 ; i < N_PIXELS-2 ; i++)
+    regs[0] <= O_MUX1 ;
+    for( int i = 0 ; i < N_PIXELS-2 ; i++)
     begin
-        reg[i+1] <= reg[i];
+        regs[i+1] <= regs[i];
     end
-    reg [N_PIXELS-1] <= O_MUX2 ;
+    regs[N_PIXELS-1] <= O_MUX2 ;
 end
-
-
-
-
-
-
-
 
 endmodule
