@@ -1,5 +1,5 @@
 module test_MEDIAN;
-logic DSI,CLK,DSO,nRST ;
+logic DSI,CLK,DSO,nRST,DSO_on ;
 logic [7:0] DI,DO ;
 
 
@@ -16,6 +16,7 @@ initial begin: ENTREES
     int i, j, k, tmp;
     CLK = 0;
     DSI = 0;
+    DSO_on = 0;
 
     repeat(1000) begin
 
@@ -42,34 +43,26 @@ initial begin: ENTREES
             v[k] = tmp;
           end
         
-        @(posedge CLK);
-
-        if(v[4] != DO and DSO) begin
+        for(int timer = 0 ; timer < 50; timer++) begin
+            @(posedge CLK);
+            if(v[4] != DO and DSO) 
+            begin
             $display("erreur : DO = ", DO, " au lieu de ", v[4]);
             $stop;
+            end
+            if (DSO)
+            begin
+                DSO_on = 1;
+                break;
+            end
         end
-        else if (!DSO) begin
-            $display("Fin de la simulation sans aucune erreur"); 
+        if(!DSO_on) begin
+            $display("DSO never turn On");
             $stop;
         end
-
     end
-    if(DSO)
-    begin
-        $display("Fin de la simulation sans aucune erreur"); 
-        $finish;
-    end
-    else begin
-        $display("Fin de la simulation sans que DSO = 1 "); 
-        $finish;
-    end
-end
-
-always@(negedge DSI,DSO)
-begin
-    #1000ns 
     $display("Fin de la simulation sans aucune erreur"); 
-    $stop;
+    $finish;
 end
 
 endmodule
