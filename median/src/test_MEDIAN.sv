@@ -2,7 +2,16 @@ module test_MEDIAN;
 logic BYP,DSI,CLK,DSO,nRST ;
 logic [7:0] DI,DO ;
 
-MED MED1(.BYP(BYP)  ,.DSI(DSI),  .CLK(CLK),  .DI(DI),  .DO(DO));
+MEDIAN #(parameter WIDTH = 8 , N_PIXELS = 9)
+            (input  logic  DSI,
+             input  logic  CLK,
+             input  logic  nRST,
+             input  logic [WIDTH-1:0] DI,
+             output logic [WIDTH-1:0] DO,
+             output logic DSO
+             );
+
+MEDIAN MEDIAN1(.DSI(DSI),  .CLK(CLK),  .DI(DI),  .DO(DO),.nRST(nRST),.DSO(DSO));
 
 always #10ns CLK = ~CLK;
 
@@ -33,21 +42,7 @@ initial begin: ENTREES
         end
 
         DI = 0;
-
-        for (i = 8; i > 4; i--) begin
-
-            BYP = 0;
-            DSI = 0;
-            for (j = 0; j < i; j++) @(posedge CLK);
-            
-            BYP = 1;
-            DSI = 1;
-            for (j = i; j < 9; j++) @(posedge CLK);
-        end
-
-        BYP = 0;
         DSI = 0;
-        for (j = 0; j < 4; j++) @(posedge CLK);
         
         // median caluculation for verification
         for(j = 0; j < 8; j = j + 1)
@@ -60,15 +55,21 @@ initial begin: ENTREES
         
         @(posedge CLK);
 
-        if(v[4] != DO or DSO) begin
+        if(v[4] != DO and DSO) begin
             $display("erreur : DO = ", DO, " au lieu de ", v[4]);
             $stop;
         end
 
     end
-    $display("Fin de la simulation sans aucune erreur"); 
-    $finish;
-
+    if(DSO)
+    begin
+        $display("Fin de la simulation sans aucune erreur"); 
+        $finish;
+    end
+    else begin
+        $display("Fin de la simulation sans que DSO = 1 "); 
+        $finish;
+    end
 end
 
 endmodule
