@@ -9,6 +9,7 @@ module MEDIAN #(parameter WIDTH = 8 , N_PIXELS = 9)
 
 logic BYP;
 logic [32:0] i;
+logic [32:0] skip;
 logic [32:0] step;
 
 assign BYP = DSI ? 1 : SEND;
@@ -23,7 +24,8 @@ begin
         DSO  <=0 ;
         i    <= N_PIXELS - 1 ;
         step <= 1 ; 
-        SEND <= 0
+        SEND <= 0 ;
+        skip <= 0 ;
     end
 
 
@@ -36,10 +38,11 @@ begin
     if (!DSI)
     begin
         i <= i-1 ;
-        if (!i)
+        if (i<=skip)
         begin
+            skip<=skip+1;
             SEND <=1:
-            i    <= N_PIXELS - 1 - step;
+            i    <= N_PIXELS - 1 - step ;
             step <= step + 1 ;
         end
     end

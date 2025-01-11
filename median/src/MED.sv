@@ -6,7 +6,7 @@ module MED #(parameter WIDTH = 8 , N_PIXELS = 9)
              output logic [WIDTH-1:0] DO);
 
 logic [WIDTH-1:0] regs [N_PIXELS-1:0];
-logic [WIDTH-1:0] A,B,MAX,MIN ;
+logic [WIDTH-1:0] A,B,MAX,MIN,O_MUX1,O_MUX2 ;
 
 assign O_MUX1 = DSI ? DI : MIN ;
 

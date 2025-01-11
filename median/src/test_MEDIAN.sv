@@ -1,6 +1,5 @@
-module test_MED;
-
-logic BYP,DSI,CLK ;
+module test_MEDIAN;
+logic BYP,DSI,CLK,DSO,nRST ;
 logic [7:0] DI,DO ;
 
 MED MED1(.BYP(BYP)  ,.DSI(DSI),  .CLK(CLK),  .DI(DI),  .DO(DO));
@@ -8,10 +7,13 @@ MED MED1(.BYP(BYP)  ,.DSI(DSI),  .CLK(CLK),  .DI(DI),  .DO(DO));
 always #10ns CLK = ~CLK;
 
 initial begin: ENTREES
-
+    nRST = 0;
+    #100ns;
+    nRST = 1;
+    
     int v[0:8];
     int i, j, k, tmp;
-
+    DSO = 0;
     CLK = 0;
     DSI = 0;
     BYP = 0;
@@ -46,7 +48,7 @@ initial begin: ENTREES
         BYP = 0;
         DSI = 0;
         for (j = 0; j < 4; j++) @(posedge CLK);
-
+        
         // median caluculation for verification
         for(j = 0; j < 8; j = j + 1)
         for(k = j + 1; k < 9; k = k + 1) 
@@ -58,7 +60,7 @@ initial begin: ENTREES
         
         @(posedge CLK);
 
-        if(v[4] != DO) begin
+        if(v[4] != DO or DSO) begin
             $display("erreur : DO = ", DO, " au lieu de ", v[4]);
             $stop;
         end
@@ -68,4 +70,5 @@ initial begin: ENTREES
     $finish;
 
 end
+
 endmodule

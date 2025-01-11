@@ -13,8 +13,8 @@
 # //  18 U.S.C. Section 1905.
 # //
 # vsim test_MED 
-# Start time: 20:08:45 on Jan 09,2025
-# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# Start time: 18:26:47 on Jan 11,2025
+# ** Note: (vsim-3812) Design is being optimized...
 # ** Warning: (vopt-10587) Some optimizations are turned off because the +acc switch is in effect. This will cause your simulation to run slowly. Please use -access/-debug to maintain needed visibility.
 # ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
 # Loading sv_std.std
@@ -22,184 +22,14 @@
 # Loading work.MED(fast)
 # Loading work.MCE(fast)
 run -all
-# erreur : DO =   1 au lieu de          36
-# ** Note: $stop    : ../src/test_MED.sv(64)
-#    Time: 1010 ns  Iteration: 1  Instance: /test_MED
-# Break in NamedBeginStat ENTREES at ../src/test_MED.sv line 64
-add wave sim:/test_MED/#INITIAL#10(ENTREES)/*
-add wave -r sim:/test_MED/#INITIAL#10(ENTREES)/*
-add wave -position end  sim:/test_MED/BYP
-add wave -position end  sim:/test_MED/DSI
-add wave -position end  sim:/test_MED/CLK
-restart
-# ** Note: (vsim-12125) Error and warning message counts have been reset to '0' because of 'restart'.
-# ** Note: (vsim-8009) Loading existing optimized design _opt
-# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
-# Loading work.test_MED(fast)
-# Loading work.MED(fast)
-# Loading work.MCE(fast)
-run -all
-# erreur : DO =   1 au lieu de          36
-# ** Note: $stop    : ../src/test_MED.sv(64)
-#    Time: 1010 ns  Iteration: 1  Instance: /test_MED
-# Break in NamedBeginStat ENTREES at ../src/test_MED.sv line 64
-restart
-# ** Note: (vsim-12125) Error and warning message counts have been reset to '0' because of 'restart'.
-# ** Note: (vsim-8009) Loading existing optimized design _opt
-# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
-# Loading work.test_MED(fast)
-# Loading work.MED(fast)
-# Loading work.MCE(fast)
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-# Next activity is in 10 ns.
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-
-step
-step
-
-
-
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-# Next activity is in 10 ns.
-step
-step
-step
-# Next activity is in 10 ns.
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-step
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-restart
-# ** Note: (vsim-12125) Error and warning message counts have been reset to '0' because of 'restart'.
-# ** Note: (vsim-8009) Loading existing optimized design _opt
-# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
-# Loading work.test_MED(fast)
-# Loading work.MED(fast)
-# Loading work.MCE(fast)
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-run
-# End time: 20:19:27 on Jan 09,2025, Elapsed time: 0:10:42
+# Fin de la simulation sans aucune erreur
+# ** Note: $finish    : ../src/test_MED.sv(69)
+#    Time: 1019990 ns  Iteration: 1  Instance: /test_MED
+# 1
+# Break in NamedBeginStat ENTREES at ../src/test_MED.sv line 69
+# Break key hit
+# Break key hit
+# Break key hit
+# Break key hit
+# End time: 18:29:28 on Jan 11,2025, Elapsed time: 0:02:41
 # Errors: 0, Warnings: 1
