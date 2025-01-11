@@ -13,23 +13,23 @@
 # //  18 U.S.C. Section 1905.
 # //
 # vsim test_MED 
-# Start time: 18:26:47 on Jan 11,2025
-# ** Note: (vsim-3812) Design is being optimized...
+# Start time: 22:54:45 on Jan 11,2025
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
 # ** Warning: (vopt-10587) Some optimizations are turned off because the +acc switch is in effect. This will cause your simulation to run slowly. Please use -access/-debug to maintain needed visibility.
 # ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
 # Loading sv_std.std
 # Loading work.test_MED(fast)
 # Loading work.MED(fast)
 # Loading work.MCE(fast)
+add wave -position insertpoint  \
+sim:/test_MED/DO
+add wave -position insertpoint  \
+sim:/test_MED/DI
 run -all
 # Fin de la simulation sans aucune erreur
-# ** Note: $finish    : ../src/test_MED.sv(69)
+# ** Note: $finish    : ../src/test_MED.sv(68)
 #    Time: 1019990 ns  Iteration: 1  Instance: /test_MED
 # 1
-# Break in NamedBeginStat ENTREES at ../src/test_MED.sv line 69
-# Break key hit
-# Break key hit
-# Break key hit
-# Break key hit
-# End time: 18:29:28 on Jan 11,2025, Elapsed time: 0:02:41
+# Break in NamedBeginStat ENTREES at ../src/test_MED.sv line 68
+# End time: 22:57:02 on Jan 11,2025, Elapsed time: 0:02:17
 # Errors: 0, Warnings: 1

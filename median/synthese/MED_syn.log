@@ -1387,7 +1387,7 @@ ABC: levB =   12  mem = 0.00 MB
 ABC: LUT = 14 : 2=1 7.1 %  3=2 14.3 %  4=2 14.3 %  5=0 0.0 %  6=9 64.3 %  Ave = 5.00
 ABC: + &write -n <abc-temp-dir>/output.aig 
 ABC: + time 
-ABC: elapse: 0.10 seconds, total: 0.10 seconds
+ABC: elapse: 0.06 seconds, total: 0.06 seconds
 
 6.50.16.6. Executing AIGER frontend.
 <suppressed ~400 debug messages>
@@ -1528,6 +1528,6 @@ Found and reported 0 problems.
 Dumping module `\MED'.
 
 Warnings: 1 unique messages, 1 total
-End of script. Logfile hash: e908a08a4e, CPU: user 0.51s system 0.03s, MEM: 32.12 MB peak
+End of script. Logfile hash: 2ac25f308c, CPU: user 0.48s system 0.04s, MEM: 32.05 MB peak
 Yosys 0.48+51 (git sha1 17a53b838, g++ 12.2.0-14 -fPIC -O3)
-Time spent: 18% 42x read_verilog (0 sec), 15% 1x abc9_exe (0 sec), ...
+Time spent: 19% 42x read_verilog (0 sec), 13% 17x techmap (0 sec), ...

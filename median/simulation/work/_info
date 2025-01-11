@@ -1,62 +1,79 @@
 m255
 K4
 z2
-!s12c _opt1
-Z0 !s99 nomlopt
-Z1 !s12c _opt
-R0
+Z0 !s12c _opt1
+Z1 !s99 nomlopt
+!s12c _opt2
 R1
 R0
 R1
-R0
+Z2 !s12c _opt
+R1
+R2
+R1
+R2
+R1
 !s11f vlog 2023.2_1 2023.05, May 12 2023
 !s112 1.1
 !i10d 8192
 !i10e 25
 !i10f 100
 cModel Technology
-Z2 d/cal/exterieurs/saitfora-23/2A/SE/souhail-ait-fora/median/simulation
+Z3 d/cal/exterieurs/saitfora-23/2A/SE/souhail-ait-fora/median/simulation
 T_opt
 !s110 1736449726
 V85cT^oD=>O6:T8@B@[QkK2
-Z3 04 8 4 work test_MED fast 0
+Z4 04 8 4 work test_MED fast 0
 =1-000ae431a4f1-67801ebd-61f70-d5645
-R0
-Z4 !s12b OEM100
-Z5 !s124 OEM100
-Z6 o-quiet -auto_acc_if_foreign -work work
-Z7 tCvgOpt 0
+R1
+Z5 !s12b OEM100
+Z6 !s124 OEM100
+Z7 o-quiet -auto_acc_if_foreign -work work
+Z8 tCvgOpt 0
 n@_opt
-Z8 OL;O;2023.2_1;77
-R2
-T_opt1
-!s110 1736616408
-V;6RIRBTR99:P>LiTE=_K<2
+Z9 OL;O;2023.2_1;77
 R3
-=1-000ae431a4f1-6782a9d7-c2bf9-35f816
-R0
+T_opt1
+!s110 1736632486
+VNQ9A2z37=SU`G`g0;K?lW0
 R4
+=1-000ae431a4f1-6782e8a5-98492-36f106
+R1
 R5
 R6
 R7
-n@_opt1
 R8
+n@_opt1
+R9
+T_opt2
+!s110 1736632087
+V38>@TUa62:6QQhf6of^cE3
+04 11 4 work test_MEDIAN fast 0
+=1-000ae431a4f1-6782e716-5baa6-36e75d
+R1
+R5
+R6
+R7
+R8
+n@_opt2
+R9
+R3
 vMCE
 2../src/MCE.sv
-Z9 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
+Z10 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
 !s110 1736616278
 !i10b 1
 !s100 @E7;WZ5lDg9Y93IOkiYUX0
 Imd;^DnjkjV=Uf0kW_4;]G3
 S1
-Z10 d/cal/exterieurs/sagouzal-23/projse04/souhail-ait-fora/median/simulation
+Z11 d/cal/exterieurs/sagouzal-23/projse04/souhail-ait-fora/median/simulation
 w1734363045
 8../src/MCE.sv
 F../src/MCE.sv
 !i122 6
 L0 1 11
-Z11 VDg1SIo80bB@j0V0VzS_@n1
-Z12 OL;L;2023.2_1;77
+Z12 VDg1SIo80bB@j0V0VzS_@n1
+Z13 OL;L;2023.2_1;77
 r1
 !s85 0
 31
@@ -64,25 +81,25 @@ r1
 !s107 ../src/MCE.sv|
 !s90 +acc|../src/MCE.sv|
 !i113 0
-Z13 o+acc -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
-R7
+Z14 o+acc -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+R8
 n@m@c@e
 vMED
 2../src/MED.sv
-R9
+R10
 !s110 1736615917
 !i10b 1
 !s100 N<1R<EzdeXP8KSF2N60dD2
 IG[>@>k>gDfz9XN0I2fl?D1
 S1
-R10
+R11
 w1736615834
 8../src/MED.sv
 F../src/MED.sv
 !i122 5
 L0 1 33
-R11
 R12
+R13
 r1
 !s85 0
 31
@@ -90,32 +107,84 @@ r1
 !s107 ../src/MED.sv|
 !s90 +acc|../src/MED.sv|
 !i113 0
-R13
-R7
+R14
+R8
 n@m@e@d
-vtest_MED
-2../src/test_MED.sv
-R9
-!s110 1736616388
-!i10b 1
-!s100 g^EGHLQQzd4N4;Em0J8;H1
-IQiig32P94EVC]:7SFm2nY0
-S1
+vMEDIAN
+2../src/MEDIAN.sv
 R10
-w1736615077
-8../src/test_MED.sv
-F../src/test_MED.sv
-!i122 7
-L0 1 72
+!s110 1736631690
+!i10b 1
+!s100 NKa6cK1?7c1hO_UVa:??;0
+IY3hHTo:IlAKe37FlLOz`d1
+S1
 R11
+w1736631680
+8../src/MEDIAN.sv
+F../src/MEDIAN.sv
+!i122 8
+L0 1 36
 R12
+R13
 r1
 !s85 0
 31
-!s108 1736616388.000000
+!s108 1736631689.000000
+!s107 ../src/MEDIAN.sv|
+!s90 +acc|../src/MEDIAN.sv|
+!i113 0
+R14
+R8
+n@m@e@d@i@a@n
+vtest_MED
+2../src/test_MED.sv
+R10
+!s110 1736632446
+!i10b 1
+!s100 F<J_k1c6aM^3b@`D:nIzR2
+I@B0<R:DN;05C1;JFfN4z;0
+S1
+R11
+w1736617958
+8../src/test_MED.sv
+F../src/test_MED.sv
+!i122 10
+L0 1 71
+R12
+R13
+r1
+!s85 0
+31
+!s108 1736632446.000000
 !s107 ../src/test_MED.sv|
 !s90 +acc|../src/test_MED.sv|
 !i113 0
-R13
-R7
+R14
+R8
 ntest_@m@e@d
+vtest_MEDIAN
+2../src/test_MEDIAN.sv
+R10
+!s110 1736632036
+!i10b 1
+!s100 `mzQAG3LI^AhPboJb4doo1
+I9C@ZMbM>J:i>OeDE_k0kM0
+S1
+R11
+w1736631990
+8../src/test_MEDIAN.sv
+F../src/test_MEDIAN.sv
+!i122 9
+L0 1 69
+R12
+R13
+r1
+!s85 0
+31
+!s108 1736632036.000000
+!s107 ../src/test_MEDIAN.sv|
+!s90 +acc|../src/test_MEDIAN.sv|
+!i113 0
+R14
+R8
+ntest_@m@e@d@i@a@n

@@ -8,12 +8,13 @@ MEDIAN MEDIAN1(.DSI(DSI),  .CLK(CLK),  .DI(DI),  .DO(DO),.nRST(nRST),.DSO(DSO));
 always #10ns CLK = ~CLK;
 
 initial begin: ENTREES
+    int i, j, k, tmp;
+    int v[0:8];
+
     nRST = 0;
     #100ns;
     nRST = 1;
     
-    int v[0:8];
-    int i, j, k, tmp;
     CLK = 0;
     DSI = 0;
     DSO_on = 0;
@@ -45,7 +46,7 @@ initial begin: ENTREES
         
         for(int timer = 0 ; timer < 50; timer++) begin
             @(posedge CLK);
-            if(v[4] != DO and DSO) 
+            if(v[4] != DO && DSO) 
             begin
             $display("erreur : DO = ", DO, " au lieu de ", v[4]);
             $stop;
