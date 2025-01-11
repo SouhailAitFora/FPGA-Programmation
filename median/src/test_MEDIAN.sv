@@ -1,15 +1,7 @@
 module test_MEDIAN;
-logic BYP,DSI,CLK,DSO,nRST ;
+logic DSI,CLK,DSO,nRST ;
 logic [7:0] DI,DO ;
 
-MEDIAN #(parameter WIDTH = 8 , N_PIXELS = 9)
-            (input  logic  DSI,
-             input  logic  CLK,
-             input  logic  nRST,
-             input  logic [WIDTH-1:0] DI,
-             output logic [WIDTH-1:0] DO,
-             output logic DSO
-             );
 
 MEDIAN MEDIAN1(.DSI(DSI),  .CLK(CLK),  .DI(DI),  .DO(DO),.nRST(nRST),.DSO(DSO));
 
@@ -22,16 +14,13 @@ initial begin: ENTREES
     
     int v[0:8];
     int i, j, k, tmp;
-    DSO = 0;
     CLK = 0;
     DSI = 0;
-    BYP = 0;
 
     repeat(1000) begin
 
         @(posedge CLK);
         DSI = 1;
-        BYP = 1;
 
         for (j = 0; j < 9; j++) begin
 
@@ -59,6 +48,10 @@ initial begin: ENTREES
             $display("erreur : DO = ", DO, " au lieu de ", v[4]);
             $stop;
         end
+        else if (!DSO) begin
+            $display("Fin de la simulation sans aucune erreur"); 
+            $stop;
+        end
 
     end
     if(DSO)
@@ -70,6 +63,13 @@ initial begin: ENTREES
         $display("Fin de la simulation sans que DSO = 1 "); 
         $finish;
     end
+end
+
+always@(negedge DSI,DSO)
+begin
+    #1000ns 
+    $display("Fin de la simulation sans aucune erreur"); 
+    $stop;
 end
 
 endmodule

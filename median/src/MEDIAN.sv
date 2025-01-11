@@ -47,10 +47,7 @@ begin
         end
     end
 
-    if(SEND)
-    begin
-        SEND <= 0;
-    end
+    SEND <= !SEND;
 
 end
 
