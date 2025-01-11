@@ -8,65 +8,30 @@ module MEDIAN #(parameter WIDTH = 8 , N_PIXELS = 9)
              );
 
 logic BYP;
-logic [32:0] i;
-logic [32:0] skip;
-logic [32:0] step;
 
-assign BYP = DSI ? 1 : SEND;
-
-assign DSO = (step == (((N_PIXELS-1)>>1) + 1)) ? 1 :0 ; 
-
-always_ff @(CLK posedge or nRST negedge)
+always@(negedge DSI)
 begin
-    if(!nRST) 
-    begin
-        DI   <=0 ; 
-        DSO  <=0 ;
-        i    <= N_PIXELS - 1 ;
-        step <= 1 ; 
-        SEND <= 0 ;
-        skip <= 0 ;
+    @(posedge CLK);
+    for (i = N_PIXELS - 1; i > 4; i--) begin
+
+            BYP = 0;
+            DSI = 0;
+            for (j = 0; j < i; j++) @(posedge CLK);
+            
+            BYP = 1;
+            DSI = 1;
+            for (j = i; j < N_PIXELS; j++) @(posedge CLK);
     end
 
-
-    if (step == (((N_PIXELS-1)>>1) + 1))
-    begin
-        step <= 1 ;
-    end
-
-
-    if (!DSI)
-    begin
-        i <= i-1 ;
-        if (i<=skip)
-        begin
-            skip<=skip+1;
-            SEND <=1:
-            i    <= N_PIXELS - 1 - step ;
-            step <= step + 1 ;
-        end
-    end
-
-    SEND <= !SEND;
-
+    BYP = 0;
+    DSI = 0;
+    for (j = 0; j < ((N_PIXELS - 1) >> 1); j++) @(posedge CLK);
+    @(posedge CLK);
+    DSO = 1;
+    @(posedge CLK);
+    DSO = 0;
 end
 
-
-
- 
 MED MED1(.BYP(BYP)  ,  .DSI(DSI),  .CLK(CLK),  .DI(DI),  .DO(DO));
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 endmodule
