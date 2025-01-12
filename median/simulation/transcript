@@ -12,24 +12,58 @@
 # //  is prohibited from disclosure under the Trade Secrets Act,
 # //  18 U.S.C. Section 1905.
 # //
-# vsim test_MED 
-# Start time: 22:54:45 on Jan 11,2025
-# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# vsim MEDIAN_tb -sdfmax "I_MEDIAN=../synthese/MEDIAN_pr.sdf" 
+# Start time: 23:40:18 on Jan 12,2025
+# ** Note: (vsim-3812) Design is being optimized...
 # ** Warning: (vopt-10587) Some optimizations are turned off because the +acc switch is in effect. This will cause your simulation to run slowly. Please use -access/-debug to maintain needed visibility.
 # ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
 # Loading sv_std.std
-# Loading work.test_MED(fast)
-# Loading work.MED(fast)
-# Loading work.MCE(fast)
-add wave -position insertpoint  \
-sim:/test_MED/DO
-add wave -position insertpoint  \
-sim:/test_MED/DI
+# Loading work.MEDIAN_tb(fast)
+# Loading work.MEDIAN(fast)
+# Loading work.MISTRAL_CONST(fast)
+# Loading work.MISTRAL_CONST(fast__1)
+# Loading work.MISTRAL_IB(fast)
+# Loading work.MISTRAL_IB(fast__1)
+# Loading work.MISTRAL_FF(fast)
+# Loading work.MISTRAL_BUF(fast)
+# Loading work.MISTRAL_OB(fast)
+# Loading work.MISTRAL_ALUT2(fast)
+# Loading work.MISTRAL_ALUT2(fast__1)
+# Loading work.MISTRAL_ALUT3(fast)
+# Loading work.MISTRAL_ALUT4(fast)
+# Loading work.MISTRAL_ALUT4(fast__1)
+# Loading work.MISTRAL_ALUT5(fast)
+# Loading work.MISTRAL_ALUT6(fast)
+# Loading work.MISTRAL_ALUT6(fast__1)
+# Loading work.MISTRAL_ALUT6(fast__2)
+# Loading work.MISTRAL_ALUT_ARITH(fast)
+# Loading work.MISTRAL_ALUT4(fast__2)
+# Loading work.MISTRAL_ALUT6(fast__3)
+# Loading work.MISTRAL_ALUT6(fast__4)
+# Loading work.MISTRAL_ALUT4(fast__3)
+# Loading work.MISTRAL_ALUT_ARITH(fast__1)
+# Loading work.MISTRAL_ALUT4(fast__4)
+# Loading work.MISTRAL_ALUT2(fast__2)
+# Loading work.MISTRAL_ALUT6(fast__5)
+# Loading work.MISTRAL_ALUT6(fast__6)
+# Loading work.MISTRAL_CLKBUF(fast)
+# Loading work.MISTRAL_ALUT3(fast__1)
+# Loading work.MISTRAL_ALUT5(fast__1)
+# Loading work.MISTRAL_ALUT5(fast__2)
+# Loading work.MISTRAL_ALUT5(fast__3)
+# Loading work.MISTRAL_ALUT5(fast__4)
+# Loading work.MISTRAL_ALUT5(fast__5)
+# Loading work.MISTRAL_ALUT6(fast__7)
+# Loading work.MISTRAL_ALUT3(fast__2)
+# Loading work.MISTRAL_ALUT4(fast__5)
+# Loading work.MISTRAL_ALUT6(fast__8)
+# Loading work.MISTRAL_ALUT2(fast__3)
+# Loading work.MISTRAL_ALUT2(fast__4)
+# Loading work.MISTRAL_ALUT4(fast__6)
+# Loading instances from ../synthese/MEDIAN_pr.sdf
+# Loading timing data from ../synthese/MEDIAN_pr.sdf
+# ** Note: (vsim-3587) SDF Backannotation Successfully Completed.
+#    Time: 0 ps  Iteration: 0  Instance: /MEDIAN_tb File: ../src/MEDIAN_tb.sv
 run -all
-# Fin de la simulation sans aucune erreur
-# ** Note: $finish    : ../src/test_MED.sv(68)
-#    Time: 1019990 ns  Iteration: 1  Instance: /test_MED
-# 1
-# Break in NamedBeginStat ENTREES at ../src/test_MED.sv line 68
-# End time: 22:57:02 on Jan 11,2025, Elapsed time: 0:02:17
+# End time: 23:45:09 on Jan 12,2025, Elapsed time: 0:04:51
 # Errors: 0, Warnings: 1
