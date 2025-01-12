@@ -1,2 +1,10 @@
-simulation/
-synthese/
+transcript
+*.wlf
+work
+*.json
+*.v
+*.log
+*.qsf
+*.tcl
+
+
