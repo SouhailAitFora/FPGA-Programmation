@@ -12,7 +12,7 @@ logic BYP;
 int counter_step ,counter_clk;
 logic [7:0] DI_ret;
 
-MED MED1(.BYP(BYP)  ,  .DSI(DSI_ret),  .CLK(CLK),  .DI(DI_ret),  .DO(DO));
+MED I_MED(.DI(DI_ret), .DSI(DSI_ret), .BYP(BYP), .CLK(CLK), .DO(DO));
 
 // this block manages our counters
 always_ff@(posedge CLK or negedge nRST) begin
@@ -84,7 +84,7 @@ always_comb begin
         BYP = 1;
     end
     else begin
-        BYP = 0;
+        BYP = 1;
     end
 
     // managing DSO
