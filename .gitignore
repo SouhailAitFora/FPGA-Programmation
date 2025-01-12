@@ -2,7 +2,6 @@ transcript
 *.wlf
 work
 *.json
-*.v
 *.log
 *.qsf
 *.tcl
