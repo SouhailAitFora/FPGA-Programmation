@@ -5,3 +5,5 @@ work
 *.log
 *.qsf
 *.tcl
+*.swp
+tmp
