@@ -20,6 +20,8 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 1 ) (
       logic [7:0] mem_1 [size-1:0];
       logic [7:0] mem_2 [size-1:0];
       logic [7:0] mem_3 [size-1:0];
+      logic [31:0] counter_read;
+      logic [31:0] counter_write;
       assign new_adress = ( avalon_a.address >> 2 );
 
       always_ff @(posedge avalon_a.clk or posedge avalon_a.reset) begin
@@ -27,13 +29,16 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 1 ) (
                   avalon_a.waitrequest <= 1 ;
                   avalon_a.readdatavalid <= 0 ;
                   avalon_a.readdata <=0 ;
+                  counter_read <= 0 ;
+                  counter_write <=0 ;
             end
             else
             begin
-            if(avalon_a.read)begin
+            if(avalon_a.read && counter_read && !counter_write)begin
                   avalon_a.waitrequest   <= 1 ;
                   avalon_a.readdatavalid <= 1 ;
-                  avalon_a.readdata <= { mem_3[new_adress], mem_2[new_adress], mem_1[new_adress], mem_0[new_adress]} ;
+                  avalon_a.readdata <= { mem_3[new_adress + counter_read], mem_2[new_adress + counter_read], mem_1[new_adress + counter_read], mem_0[new_adress + counter_read]} ;
+                  counter_read <= counter_read + 1 ; 
             end
             else begin
                   avalon_a.waitrequest   <= 0;
@@ -54,13 +59,22 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 1 ) (
       begin
             if (avalon_a.write) 
             begin
-                  if(avalon_a.byteenable[0] ) mem_0[new_adress] <= avalon_a.writedata[7:0]; 
-                  if(avalon_a.byteenable[1] ) mem_1[new_adress] <= avalon_a.writedata[15:8];
-                  if(avalon_a.byteenable[2] ) mem_2[new_adress] <= avalon_a.writedata[23:16];
-                  if(avalon_a.byteenable[3] ) mem_3[new_adress] <= avalon_a.writedata[31:24];
-            
+                  if(avalon_a.byteenable[0] ) mem_0[new_adress + counter_write] <= avalon_a.writedata[7:0]; 
+                  if(avalon_a.byteenable[1] ) mem_1[new_adress + counter_write] <= avalon_a.writedata[15:8];
+                  if(avalon_a.byteenable[2] ) mem_2[new_adress + counter_write] <= avalon_a.writedata[23:16];
+                  if(avalon_a.byteenable[3] ) mem_3[new_adress + counter_write] <= avalon_a.writedata[31:24];
+                  counter_write <= counter_write + 1 ;
             end
 
+      end
+
+      always_ff@(posedge avalon_a.clk)begin
+            if (counter_read == avalon_a.burstcount) begin
+                  counter_read <=0;
+            end
+            if(counter_write == avalon_a.burstcount)begin
+                  counter_write <=0;
+            end
       end
 
 
