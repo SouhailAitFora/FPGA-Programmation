@@ -34,7 +34,7 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 1 ) (
             end
             else
             begin
-            if(avalon_a.read && counter_read && !counter_write)begin
+            if(avalon_a.read && !counter_write)begin
                   avalon_a.waitrequest   <= 1 ;
                   avalon_a.readdatavalid <= 1 ;
                   avalon_a.readdata <= { mem_3[new_adress + counter_read], mem_2[new_adress + counter_read], mem_1[new_adress + counter_read], mem_0[new_adress + counter_read]} ;
