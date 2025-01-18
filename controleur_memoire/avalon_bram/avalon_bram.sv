@@ -39,15 +39,12 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
             if (counter_write == 0 && avalon_a.write) address_burst_write = new_address;
             else address_burst_write = new_address + counter_write;
 
-            if(avalon_a.read ||  (counter_read>0)) avalon_a.readdata = { mem_3[address_burst], mem_2[address_burst], mem_1[address_burst], mem_0[address_burst]} ;
-            else avalon_a.readdata = 0;
       end
 
       always_ff @(posedge avalon_a.clk or posedge avalon_a.reset) begin
             if(avalon_a.reset)begin
                   avalon_a.waitrequest <= 1 ;
                   avalon_a.readdatavalid <= 0 ;
-                  avalon_a.readdata <=0 ;
                   save_burst <= 1 ;
             end
             else
@@ -55,6 +52,7 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
                   if(counter_read == save_burst )begin
                         avalon_a.waitrequest   <= 0 ;
                         avalon_a.readdatavalid <= 0 ;
+                        avalon_a.readdata <= 0;
                   end
                   else begin
                         if(avalon_a.read ||  (counter_read>0)  )begin
@@ -66,6 +64,7 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
 
                               avalon_a.waitrequest   <= 1 ;
                               avalon_a.readdatavalid <= 1 ;
+                              avalon_a.readdata <= { mem_3[address_burst], mem_2[address_burst], mem_1[address_burst], mem_0[address_burst]} ;
                         end
                         else begin
                               avalon_a.waitrequest   <= 0;
@@ -92,9 +91,7 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
                   if(avalon_a.byteenable[1] ) mem_1[address_burst_write] <= avalon_a.writedata[15:8];
                   if(avalon_a.byteenable[2] ) mem_2[address_burst_write] <= avalon_a.writedata[23:16];
                   if(avalon_a.byteenable[3] ) mem_3[address_burst_write] <= avalon_a.writedata[31:24];
-                  $display("%d",new_address);
-                  $$display("%d",counter_write);
-                  $display("%d",address_burst);
+                  $display("%d, %d , %d",new_address,counter_write,address_burst);
             end
 
       end
