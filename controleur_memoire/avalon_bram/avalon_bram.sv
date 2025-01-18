@@ -17,6 +17,7 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
       parameter size =  1 << (RAM_ADD_W) ;
       parameter size_burst = 1 << (BURSTCOUNT_W-1);
       logic [size-1:0] new_address;
+      logic [size-1:0] new_address_reg; 
       logic [7:0] mem_0 [size-1:0];
       logic [7:0] mem_1 [size-1:0];
       logic [7:0] mem_2 [size-1:0];
@@ -28,11 +29,19 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
       logic [size_burst-1:0] address_burst_write ;
 
 
+      always_comb begin
 
-      assign new_address = ( avalon_a.address >> 2 ) & (size-1) ;
-      assign address_burst = new_address + counter_read;
-      assign address_burst_write = new_address + counter_write;
+            new_address = ( avalon_a.address >> 2 ) & (size-1) ;
 
+            if (counter_read == 0 && avalon_a.read) address_burst = new_address;
+            else address_burst = new_address_reg + counter_read;
+
+            if (counter_write == 0 && avalon_a.write) address_burst_write = new_address;
+            else address_burst_write = new_address + counter_write;
+
+            if(avalon_a.read ||  (counter_read>0)) avalon_a.readdata = { mem_3[address_burst], mem_2[address_burst], mem_1[address_burst], mem_0[address_burst]} ;
+            else avalon_a.readdata = 0;
+      end
 
       always_ff @(posedge avalon_a.clk or posedge avalon_a.reset) begin
             if(avalon_a.reset)begin
@@ -44,19 +53,19 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
             else
             begin
                   if(counter_read == save_burst )begin
-                        avalon_a.waitrequest   <= 0  ;
+                        avalon_a.waitrequest   <= 0 ;
                         avalon_a.readdatavalid <= 0 ;
                   end
-                  else 
-                  begin
+                  else begin
                         if(avalon_a.read ||  (counter_read>0)  )begin
+
                               if(avalon_a.read)  begin 
                                     save_burst <= avalon_a.burstcount;
-                                    new_address<= ( avalon_a.address >> 2 ) & (size-1) ;
+                                    new_address_reg <= ( avalon_a.address >> 2 ) & (size-1) ;
                               end
+
                               avalon_a.waitrequest   <= 1 ;
                               avalon_a.readdatavalid <= 1 ;
-                              avalon_a.readdata <= { mem_3[address_burst], mem_2[address_burst], mem_1[address_burst], mem_0[address_burst]} ;
                         end
                         else begin
                               avalon_a.waitrequest   <= 0;
@@ -66,7 +75,7 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
                   
                   if (avalon_a.write && (counter_write ==0)) begin
                         save_burst<= avalon_a.burstcount;
-                        new_address<= ( avalon_a.address >> 2 ) & (size-1) ;
+                        new_address_reg <= ( avalon_a.address >> 2 ) & (size-1) ;
                   end
 
 
