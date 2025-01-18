@@ -9,71 +9,86 @@
 // (voir doc mnl_avalon_spec.pdf, page 17)
 `timescale 1ns/1ps
 `default_nettype none
-module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 1 ) (
+module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
       // Avalon  interface for an agent
       avalon_if.agent avalon_a
       );
       // a vous de jouer a partir d'ici
       parameter size =  1 << (RAM_ADD_W) ;
-      logic [31:0] new_adress;
+      parameter size_burst = 1 << (BURSTCOUNT_W-1);
+      logic [size-1:0] new_adress;
       logic [7:0] mem_0 [size-1:0];
       logic [7:0] mem_1 [size-1:0];
       logic [7:0] mem_2 [size-1:0];
       logic [7:0] mem_3 [size-1:0];
-      logic [31:0] counter_read;
-      logic [31:0] counter_write;
+      logic [size_burst-1:0] counter_read;
+      logic [size_burst-1:0] counter_write;
+      logic [size_burst-1:0] adress_burst ;
+
+
       assign new_adress = ( avalon_a.address >> 2 );
+      assign adress_burst = new_adress + counter_read;
+
 
       always_ff @(posedge avalon_a.clk or posedge avalon_a.reset) begin
             if(avalon_a.reset)begin
                   avalon_a.waitrequest <= 1 ;
                   avalon_a.readdatavalid <= 0 ;
                   avalon_a.readdata <=0 ;
-                  counter_read <= 0 ;
-                  counter_write <=0 ;
             end
             else
             begin
-            if(avalon_a.read && !counter_write)begin
-                  avalon_a.waitrequest   <= 1 ;
-                  avalon_a.readdatavalid <= 1 ;
-                  avalon_a.readdata <= { mem_3[new_adress + counter_read], mem_2[new_adress + counter_read], mem_1[new_adress + counter_read], mem_0[new_adress + counter_read]} ;
-                  counter_read <= counter_read + 1 ; 
-            end
-            else begin
-                  avalon_a.waitrequest   <= 0;
-                  avalon_a.readdatavalid <= 0 ;
-            end
+                  if(avalon_a.read && !counter_write)begin
+                        avalon_a.waitrequest   <= 1 ;
+                        avalon_a.readdatavalid <= 1 ;
+                        avalon_a.readdata <= { mem_3[adress_burst], mem_2[adress_burst], mem_1[adress_burst], mem_0[adress_burst]} ;
+                  end
+                  else begin
+                        avalon_a.waitrequest   <= 0;
+                        avalon_a.readdatavalid <= 0 ;
+                  end
 
-            if(avalon_a.waitrequest )begin
-                  avalon_a.waitrequest   <= 0  ;
-                  avalon_a.readdatavalid <= 0 ;
+                  if(avalon_a.waitrequest )begin
+                        avalon_a.waitrequest   <= 0  ;
+                        avalon_a.readdatavalid <= 0 ;
+                  end
 
-
-            end
             end
             
       end
 
       always_ff @(posedge avalon_a.clk)
       begin
+
             if (avalon_a.write) 
             begin
-                  if(avalon_a.byteenable[0] ) mem_0[new_adress + counter_write] <= avalon_a.writedata[7:0]; 
-                  if(avalon_a.byteenable[1] ) mem_1[new_adress + counter_write] <= avalon_a.writedata[15:8];
-                  if(avalon_a.byteenable[2] ) mem_2[new_adress + counter_write] <= avalon_a.writedata[23:16];
-                  if(avalon_a.byteenable[3] ) mem_3[new_adress + counter_write] <= avalon_a.writedata[31:24];
-                  counter_write <= counter_write + 1 ;
+                  if(avalon_a.byteenable[0] ) mem_0[new_adress] <= avalon_a.writedata[7:0]; 
+                  if(avalon_a.byteenable[1] ) mem_1[new_adress] <= avalon_a.writedata[15:8];
+                  if(avalon_a.byteenable[2] ) mem_2[new_adress] <= avalon_a.writedata[23:16];
+                  if(avalon_a.byteenable[3] ) mem_3[new_adress] <= avalon_a.writedata[31:24];
             end
 
       end
 
-      always_ff@(posedge avalon_a.clk)begin
-            if (counter_read == avalon_a.burstcount) begin
-                  counter_read <=0;
+      always_ff@(posedge avalon_a.clk or posedge avalon_a.reset)begin
+            if(avalon_a.reset)begin
+                  counter_read <= 0 ;
+                  counter_write <=0 ;
             end
-            if(counter_write == avalon_a.burstcount)begin
-                  counter_write <=0;
+            else begin
+                  if(counter_write == avalon_a.burstcount)begin
+                        counter_write <=0;
+                  end
+                  else if (avalon_a.write) begin
+                        counter_write <= counter_write + 1 ;
+                  end
+
+                  if (counter_read == avalon_a.burstcount) begin
+                        counter_read <=0;
+                  end
+                  else if (avalon_a.read && !counter_write) begin
+                        counter_read <= counter_read + 1;
+                  end
             end
       end
 
