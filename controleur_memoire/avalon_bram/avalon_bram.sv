@@ -50,7 +50,10 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
                   else 
                   begin
                         if(avalon_a.read ||  (counter_read>0)  )begin
-                              if(avalon_a.read)  save_burst <= avalon_a.burstcount;
+                              if(avalon_a.read)  begin 
+                                    save_burst <= avalon_a.burstcount;
+                                    new_address<= ( avalon_a.address >> 2 ) & (size-1) ;
+                              end
                               avalon_a.waitrequest   <= 1 ;
                               avalon_a.readdatavalid <= 1 ;
                               avalon_a.readdata <= { mem_3[address_burst], mem_2[address_burst], mem_1[address_burst], mem_0[address_burst]} ;
@@ -61,8 +64,9 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
                         end
                   end
                   
-                  if (avalon_a.write) begin
+                  if (avalon_a.write && (counter_write ==0)) begin
                         save_burst<= avalon_a.burstcount;
+                        new_address<= ( avalon_a.address >> 2 ) & (size-1) ;
                   end
 
 
@@ -79,7 +83,8 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
                   if(avalon_a.byteenable[1] ) mem_1[address_burst_write] <= avalon_a.writedata[15:8];
                   if(avalon_a.byteenable[2] ) mem_2[address_burst_write] <= avalon_a.writedata[23:16];
                   if(avalon_a.byteenable[3] ) mem_3[address_burst_write] <= avalon_a.writedata[31:24];
-                  $display("koko");
+                  $display("%d",new_address);
+                  $$display("%d",counter_write);
                   $display("%d",address_burst);
             end
 
