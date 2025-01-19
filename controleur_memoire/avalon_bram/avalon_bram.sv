@@ -19,8 +19,9 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
       logic [7:0] mem_1 [size-1:0];
       logic [7:0] mem_2 [size-1:0];
       logic [7:0] mem_3 [size-1:0];
+      logic [31:0] full_address, address_reg;
       logic [BURSTCOUNT_W-1:0] counter_read, counter_write;
-      logic [RAM_ADD_W-1:0] address_reg, full_address, word_address, final_address; 
+      logic [RAM_ADD_W-1:0] word_address, final_address; 
       logic [BURSTCOUNT_W-1:0] burstcount_reg, full_burstcount;
       logic past_reset, true_write, true_read;
       // TODO size might be wrong
@@ -29,7 +30,7 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
     assign true_read = avalon_a.read && !avalon_a.waitrequest;
 
     // gestion des compteurs
-    always_ff @(posedge avalon_a.clk or negedge avalon_a.reset) begin
+    always_ff @(posedge avalon_a.clk or posedge avalon_a.reset) begin
         if (avalon_a.reset) begin
             counter_read <= 0;
             counter_write <= 0;
@@ -48,7 +49,7 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
     end
 
     // gestion de sauvegarde de l'adresse et de burstcount
-    always_ff @(posedge avalon_a.clk or negedge avalon_a.reset) begin
+    always_ff @(posedge avalon_a.clk or posedge avalon_a.reset) begin
 
         if (avalon_a.reset) begin
             address_reg <= 0;
@@ -68,7 +69,7 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
         end
     end
 
-    // creation d'une "full" adresse et "full" bustcount qi sont valides tout au long de l'operation
+    // creation d'une "full" adresse et "full" bustcount qui sont valides tout au long de l'operation
     always_comb begin
         if ((true_read) || (true_write && (counter_write == 0))) begin
             full_address = avalon_a.address;
