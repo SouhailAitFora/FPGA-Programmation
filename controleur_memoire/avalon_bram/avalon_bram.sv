@@ -14,110 +14,115 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
       avalon_if.agent avalon_a
       );
       // a vous de jouer a partir d'ici
-      parameter size =  1 << (RAM_ADD_W) ;
-      parameter size_burst = 1 << (BURSTCOUNT_W-1);
-      logic [size-1:0] new_address;
-      logic [size-1:0] new_address_reg; 
+      parameter size =  1 << (RAM_ADD_W);
       logic [7:0] mem_0 [size-1:0];
       logic [7:0] mem_1 [size-1:0];
       logic [7:0] mem_2 [size-1:0];
       logic [7:0] mem_3 [size-1:0];
-      logic [size_burst-1:0] counter_read;
-      logic [size_burst-1:0] counter_write;
-      logic [size_burst-1:0] address_burst ;
-      logic [size_burst-1:0] save_burst ;
-      logic [size_burst-1:0] address_burst_write ;
+      logic [BURSTCOUNT_W-1:0] counter_read, counter_write;
+      logic [RAM_ADD_W-1:0] address_reg, full_address, word_address, final_address; 
+      logic [BURSTCOUNT_W-1:0] burstcount_reg, full_burstcount;
+      logic past_reset, true_write, true_read;
+      // TODO size might be wrong
+    
+    assign true_write = avalon_a.write && !avalon_a.waitrequest;
+    assign true_read = avalon_a.read && !avalon_a.waitrequest;
 
+    // gestion des compteurs
+    always_ff @(posedge avalon_a.clk or negedge avalon_a.reset) begin
+        if (avalon_a.reset) begin
+            counter_read <= 0;
+            counter_write <= 0;
+        end
+        else begin
 
-      always_comb begin
+            // compteur de lecture
+            if (counter_read == full_burstcount) counter_read <= 0;
+            else if (true_read || (counter_read > 0)) counter_read <= counter_read + 1;
 
-            new_address = ( avalon_a.address >> 2 ) & (size-1) ;
+            // compteur d'écriture
+            if ((counter_write + 1) == full_burstcount) counter_write <= 0;
+            else if (true_write) counter_write <= counter_write + 1;
+        end
+        
+    end
 
-            if (counter_read == 0 && avalon_a.read) address_burst = new_address;
-            else address_burst = new_address_reg + counter_read;
+    // gestion de sauvegarde de l'adresse et de burstcount
+    always_ff @(posedge avalon_a.clk or negedge avalon_a.reset) begin
 
-            if (counter_write == 0 && avalon_a.write) address_burst_write = new_address;
-            else address_burst_write = new_address + counter_write;
+        if (avalon_a.reset) begin
+            address_reg <= 0;
+            burstcount_reg <= 1;
+        end
+        else begin
+            past_reset <= avalon_a.reset;
 
-      end
-
-      always_ff @(posedge avalon_a.clk or posedge avalon_a.reset) begin
-            if(avalon_a.reset)begin
-                  avalon_a.waitrequest <= 1 ;
-                  avalon_a.readdatavalid <= 0 ;
-                  save_burst <= 1 ;
+            if (true_read) begin
+                address_reg <= avalon_a.address;
+                burstcount_reg <= avalon_a.burstcount;
             end
-            else
+            else if (true_write && (counter_write == 0)) begin
+                address_reg <= avalon_a.address;
+                burstcount_reg <= avalon_a.burstcount;
+            end
+        end
+    end
+
+    // creation d'une "full" adresse et "full" bustcount qi sont valides tout au long de l'operation
+    always_comb begin
+        if ((true_read) || (true_write && (counter_write == 0))) begin
+            full_address = avalon_a.address;
+            full_burstcount = avalon_a.burstcount;
+        end
+        else begin
+            full_address = address_reg;
+            full_burstcount = burstcount_reg;
+        end
+    end
+
+    // calcul de l'adresse final
+    always_comb begin
+
+        word_address = (full_address >> 2) & (size - 1);
+
+        if (counter_read > 0) begin
+            final_address = word_address + counter_read - 1;
+        end
+        else if (true_write) begin
+            final_address = word_address + counter_write;
+        end
+
+    end
+
+    // Lecture
+    always_comb begin
+        if (counter_read > 0) begin
+            avalon_a.readdata = {mem_3[final_address], mem_2[final_address], mem_1[final_address], mem_0[final_address]};
+            avalon_a.waitrequest = 1;
+            avalon_a.readdatavalid = 1;
+        end
+        else if (avalon_a.reset || past_reset)begin 
+            avalon_a.readdata = 0;
+            avalon_a.waitrequest = 1;
+            avalon_a.readdatavalid = 0;
+        end
+        else begin
+            avalon_a.readdata = 0;
+            avalon_a.waitrequest = 0;
+            avalon_a.readdatavalid = 0;
+        end
+    end
+
+    // Ecriture
+    always_ff @(posedge avalon_a.clk) begin
+            if (true_write) 
             begin
-                  if(counter_read == save_burst )begin
-                        avalon_a.waitrequest   <= 0 ;
-                        avalon_a.readdatavalid <= 0 ;
-                        avalon_a.readdata <= 0;
-                  end
-                  else begin
-                        if(avalon_a.read ||  (counter_read>0)  )begin
-
-                              if(avalon_a.read)  begin 
-                                    save_burst <= avalon_a.burstcount;
-                                    new_address_reg <= ( avalon_a.address >> 2 ) & (size-1) ;
-                              end
-
-                              avalon_a.waitrequest   <= 1 ;
-                              avalon_a.readdatavalid <= 1 ;
-                              avalon_a.readdata <= { mem_3[address_burst], mem_2[address_burst], mem_1[address_burst], mem_0[address_burst]} ;
-                        end
-                        else begin
-                              avalon_a.waitrequest   <= 0;
-                              avalon_a.readdatavalid <= 0 ;
-                        end
-                  end
-                  
-                  if (avalon_a.write && (counter_write ==0)) begin
-                        save_burst<= avalon_a.burstcount;
-                        new_address_reg <= ( avalon_a.address >> 2 ) & (size-1) ;
-                  end
-
-
-            end
-            
-      end
-
-      always_ff @(posedge avalon_a.clk)
-      begin
-
-            if (avalon_a.write) 
-            begin
-                  if(avalon_a.byteenable[0] ) mem_0[address_burst_write] <= avalon_a.writedata[7:0]; 
-                  if(avalon_a.byteenable[1] ) mem_1[address_burst_write] <= avalon_a.writedata[15:8];
-                  if(avalon_a.byteenable[2] ) mem_2[address_burst_write] <= avalon_a.writedata[23:16];
-                  if(avalon_a.byteenable[3] ) mem_3[address_burst_write] <= avalon_a.writedata[31:24];
-                  $display("%d, %d , %d",new_address,counter_write,address_burst);
+                if(avalon_a.byteenable[0]) mem_0[final_address] <= avalon_a.writedata[7:0]; 
+                if(avalon_a.byteenable[1]) mem_1[final_address] <= avalon_a.writedata[15:8];
+                if(avalon_a.byteenable[2]) mem_2[final_address] <= avalon_a.writedata[23:16];
+                if(avalon_a.byteenable[3]) mem_3[final_address] <= avalon_a.writedata[31:24];
             end
 
-      end
-
-      always_ff@(posedge avalon_a.clk or posedge avalon_a.reset)begin
-            if(avalon_a.reset)begin
-                  counter_read <= 0 ;
-                  counter_write <=0 ;
-            end
-            else begin
-                  if(counter_write == save_burst)begin
-                        counter_write <=0;
-                  end
-                  else if (avalon_a.write) begin
-                        counter_write <= counter_write + 1 ;
-                  end
-
-                  if (counter_read == save_burst) begin
-                        counter_read <=0;
-                  end
-                  else if (avalon_a.read ||   (counter_read>0) ) begin
-                        counter_read <= counter_read + 1;
-                  end
-            end
-      end
-
-
+    end
 endmodule
 
