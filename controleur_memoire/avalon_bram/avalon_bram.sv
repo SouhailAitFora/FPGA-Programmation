@@ -41,7 +41,7 @@ module avalon_bram #(parameter RAM_ADD_W = 8, BURSTCOUNT_W = 4 ) (
             else if (true_read || (counter_read > 0)) counter_read <= counter_read + 1;
 
             // compteur d'écriture
-            if ((counter_write + 1) == full_burstcount) counter_write <= 0;
+            if ((counter_write + 1) == full_burstcount && true_write) counter_write <= 0;
             else if (true_write) counter_write <= counter_write + 1;
         end
         
