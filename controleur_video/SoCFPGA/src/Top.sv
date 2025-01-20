@@ -81,12 +81,14 @@ int counter;
 
 assign LED[0] = KEY[0];
 
-always_ff @(posedge sys_clk or pos sys_rst) begin
+always_ff @(posedge sys_clk or posedge sys_rst) begin
     if (sys_rst) begin
         LED[1] <= 0;
+        counter <= 0;
     end
-    else if(counter == hcmpt)begin
-        LED[1] <= ~LED[1]
+    else if(counter == (hcmpt - 1))begin
+        LED[1] <= ~LED[1];
+        counter <= 0;
     end
     else begin
         counter <= counter + 1;

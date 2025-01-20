@@ -22,32 +22,32 @@ Top Top0(.*) ;
 
 // generation of clock signal 
 always begin
-    FPGA_CLK1_50 = 1 ;
-    # 10 ns 
     FPGA_CLK1_50 = 0 ;
-    # 10 ns 
+    # 10ns ;
+    FPGA_CLK1_50 = 1 ;
+    # 10ns ;
 end
 
 // simulation of an random interaction with KEY[0]
 initial begin
 
     KEY[0] = 1 ;
-    #128 ns    ; 
+    #128ns    ; 
     KEY[0] = 0 ;
-    #128 ns    ;
+    #128ns    ;
     KEY[0] = 1 ;
 
 end
 
 // end simulation after 4 ms
 always begin
-    # 4 ms ;
+    # 4ms ;
     $stop(); 
     
 end
 
 // test of LED[0]
-always begin
+always@(*) begin
     if(KEY[0] != LED[0]) begin
         $display(" LED[0] != KEY[0]");
         $stop();    
