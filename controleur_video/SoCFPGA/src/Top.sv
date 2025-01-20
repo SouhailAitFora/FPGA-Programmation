@@ -72,26 +72,59 @@ assign avalon_if_sdram.byteenable = '0 ;
 //------- Code Eleves ------
 //--------------------------
 `ifdef SIMULATION
-  localparam hcmpt=100 ;
+  localparam periode_LED1 = 100;
+  localparam periode_LED2 =  32;
 `else
-  localparam hcmpt=100 000 000 ;
+  localparam periode_LED1 = 100 000 000;
+  localparam periode_LED2 =  32 000 000;
 `endif
 
-int counter;
+int counter1, counter2;
+logic pixel_rst, ff1, ff2;
 
 assign LED[0] = KEY[0];
 
+// Clignotement de LED[1] à 1Hz
 always_ff @(posedge sys_clk or posedge sys_rst) begin
     if (sys_rst) begin
         LED[1] <= 0;
-        counter <= 0;
+        counter1 <= 0;
     end
-    else if(counter == (hcmpt - 1))begin
+    else if(counter1 == (periode_LED1 - 1))begin
         LED[1] <= ~LED[1];
-        counter <= 0;
+        counter1 <= 0;
     end
     else begin
-        counter <= counter + 1;
+        counter1 <= counter1 + 1;
+    end
+end
+
+// Génération de signal de reset pour pixel_clk
+always_ff @(posedge pixel_clk or posedge sys_rst) begin
+    if (sys_rst) begin
+        ff1 <= 1;
+        ff2 <= 1;
+    end
+    else begin
+        ff1 <= 0;
+        ff2 <= ff1;
+    end
+end
+
+assign pixel_rst = ff2;
+
+// Clignotement de LED[1] à 1Hz
+always_ff @(posedge pixel_clk or posedge pixel_rst) begin
+    if (pixel_rst) begin
+        LED[2] <= 0;
+        counter2 <= 0;
+    end
+    else if(counter2 == (periode_LED2 - 1))begin
+        LED[2] <= ~LED[2];
+        counter2 <= 0;
+    end
+    else begin
+        counter2 <= counter2 + 1;
     end
 end
 
