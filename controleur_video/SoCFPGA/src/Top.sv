@@ -71,6 +71,12 @@ assign avalon_if_sdram.byteenable = '0 ;
 //--------------------------
 //------- Code Eleves ------
 //--------------------------
+`ifdef SIMULATION
+  localparam hcmpt=100 ;
+`else
+  localparam hcmpt=100 000 000 ;
+`endif
+
 int counter;
 
 assign LED[0] = KEY[0];
@@ -79,7 +85,7 @@ always_ff @(posedge sys_clk or pos sys_rst) begin
     if (sys_rst) begin
         LED[1] <= 0;
     end
-    else if(counter == 100 000 000)begin
+    else if(counter == hcmpt)begin
         LED[1] <= ~LED[1]
     end
     else begin
