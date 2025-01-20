@@ -50,7 +50,7 @@ hw_support hw_support_inst (
 //=============================
 // On neutralise l'interface
 // du flux video pour l'instant
-// A SUPPRIMER PLUS TARD
+//TODO A SUPPRIMER PLUS TARD
 //=============================
 assign avalon_if_stream.waitrequest = 1'b1;
 assign avalon_if_stream.readdata = '0 ;
@@ -59,7 +59,7 @@ assign avalon_if_stream.readdata = '0 ;
 //=============================
 // On neutralise l'interface SDRAM
 // pour l'instant
-// A SUPPRIMER PLUS TARD
+//TODO A SUPPRIMER PLUS TARD
 //=============================
 assign avalon_if_sdram.write  = 1'b0;
 assign avalon_if_sdram.read   = 1'b0;
@@ -71,6 +71,21 @@ assign avalon_if_sdram.byteenable = '0 ;
 //--------------------------
 //------- Code Eleves ------
 //--------------------------
+int counter;
+
+assign LED[0] = KEY[0];
+
+always_ff @(posedge sys_clk or pos sys_rst) begin
+    if (sys_rst) begin
+        LED[1] <= 0;
+    end
+    else if(counter == 100 000 000)begin
+        LED[1] <= ~LED[1]
+    end
+    else begin
+        counter <= counter + 1;
+    end
+end
 
 endmodule
 `default_nettype wire
