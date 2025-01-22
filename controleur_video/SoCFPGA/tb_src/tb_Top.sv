@@ -5,7 +5,7 @@
 module tb_Top;
 
 // Entrées sorties extérieures
-bit   FPGA_CLK1_50;
+bit         FPGA_CLK1_50;
 logic [1:0]	KEY;
 wire  [7:0]	LED;
 logic [3:0]	SW;
@@ -13,8 +13,13 @@ logic [3:0]	SW;
 // Interface vers le support matériel
 hws_if      hws_ifm();
 
+// instanciation of video interface
+video_if video_if0() ;
 // Instance du module Top
-Top Top0(.*) ;
+Top #(.HDISP(160 ),.VDISP(90))Top0(.FPGA_CLK1_50(FPGA_CLK1_50)
+,.KEY(KEY)
+,.LED(LED)
+.SW(SW),.video_ifm(video_if0)) ;
 
 ///////////////////////////////
 //  Code élèves
@@ -53,6 +58,7 @@ always@(*) begin
         $stop();    
     end
 end
+
 
 
 endmodule

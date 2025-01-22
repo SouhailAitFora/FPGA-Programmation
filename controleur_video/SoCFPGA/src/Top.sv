@@ -1,6 +1,6 @@
 `default_nettype none
 
-module Top (
+module Top #(parameter  HDISP  = 800, VDISP  = 480 )(
     // Les signaux externes de la partie FPGA
 	input  wire  FPGA_CLK1_50,
 	input  wire  [1:0]	KEY,
@@ -8,6 +8,9 @@ module Top (
 	input  wire	 [3:0]	SW,
     // Les signaux du support matériel son regroupés dans une interface
     hws_if.master       hws_ifm
+    // signal of video interface 
+    video_if.master video_ifm 
+
 );
 
 //====================================
@@ -71,6 +74,17 @@ assign avalon_if_sdram.byteenable = '0 ;
 //--------------------------
 //------- Code Eleves ------
 //--------------------------
+
+// instantiation of VGA module
+vga #(.HDISP(HDISP),.VDISP(VDISP)) vga_inst (
+        .pixel_clk(pixel_clk),
+        .pixel_rst(pixel_rst),
+        .video_ifm(video_ifm)
+);
+
+
+
+
 `ifdef SIMULATION
   localparam periode_LED1 = 100;
   localparam periode_LED2 =  32;
