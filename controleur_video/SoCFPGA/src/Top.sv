@@ -75,8 +75,8 @@ assign avalon_if_sdram.byteenable = '0 ;
   localparam periode_LED1 = 100;
   localparam periode_LED2 =  32;
 `else
-  localparam periode_LED1 = 100 000 000;
-  localparam periode_LED2 =  32 000 000;
+  localparam periode_LED1 = 100000000;
+  localparam periode_LED2 =  32000000;
 `endif
 
 int counter1, counter2;
