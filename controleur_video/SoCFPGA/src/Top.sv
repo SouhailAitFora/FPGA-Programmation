@@ -7,7 +7,7 @@ module Top #(parameter  HDISP  = 800, VDISP  = 480 )(
 	output logic [7:0]	LED,
 	input  wire	 [3:0]	SW,
     // Les signaux du support matériel son regroupés dans une interface
-    hws_if.master       hws_ifm
+    hws_if.master       hws_ifm,
     // signal of video interface 
     video_if.master video_ifm 
 
@@ -76,6 +76,9 @@ assign avalon_if_sdram.byteenable = '0 ;
 //--------------------------
 
 // instantiation of VGA module
+logic pixel_rst, ff1, ff2;
+
+
 vga #(.HDISP(HDISP),.VDISP(VDISP)) vga_inst (
         .pixel_clk(pixel_clk),
         .pixel_rst(pixel_rst),
@@ -94,7 +97,6 @@ vga #(.HDISP(HDISP),.VDISP(VDISP)) vga_inst (
 `endif
 
 int counter1, counter2;
-logic pixel_rst, ff1, ff2;
 
 assign LED[0] = KEY[0];
 

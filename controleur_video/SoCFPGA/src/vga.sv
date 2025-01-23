@@ -1,9 +1,9 @@
 module vga #(parameter  HDISP  = 800, VDISP  = 480 ) (
+      input logic pixel_clk,
+      input logic pixel_rst,
+      
       // video  interface for a master
       video_if.master video_ifm
-
-      input logic pixel_clk;
-      input logic pixel_rst;
       );
 //  nombre of pixels of each signal
 localparam HFP = 40;
@@ -50,11 +50,11 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
         end
         
         //control of vertical counter
-        if (vertical_counter_counter == (VFP + VPULSE + VBP + VDISP -1)) begin
+        if (vertical_counter == (VFP + VPULSE + VBP + VDISP -1)) begin
             vertical_counter <= 0 ; 
         end
         else if (horizontal_counter == (HFP + HPULSE + HBP + HDISP -1)) begin
-            vertical_counter <= horizontal_counter + 1 ;
+            vertical_counter <= vertical_counter + 1 ;
         end
         else begin
             vertical_counter <= vertical_counter ;
@@ -66,7 +66,7 @@ end
 always_ff@(posedge pixel_clk or posedge pixel_rst)begin
     if (pixel_rst) begin
         video_ifm.VS    <= 1 ;
-        video_ifm.HS    <= 1 
+        video_ifm.HS    <= 1 ;
         video_ifm.BLANK <=0 ;
     end
     else begin
@@ -90,6 +90,9 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
         if (horizontal_counter < (HFP + HPULSE + HBP - 1) || vertical_counter < (VFP + VPULSE + VBP - 1)   ) begin
             video_ifm.BLANK  <= 0 ;  
         end
+        else if (horizontal_counter == (HFP + HPULSE + HBP + HDISP -1)||vertical_counter == (VFP + VPULSE + VBP + VDISP -1) ) begin
+            video_ifm.BLANK  <= 0 ; 
+        end
         else begin
             video_ifm.BLANK <= 1 ;
         end
@@ -103,10 +106,10 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
         video_ifm.RGB <= 0; 
     end
     else begin
-        if((((vertical_counter-(VFP + VPULSE + VBP - 1))) & 4'hf) == 15 ) begin
+        if(((vertical_counter-(VFP + VPULSE + VBP - 1)) & 4'hf) == 15 && vertical_counter > (VFP + VPULSE + VBP - 1)) begin
             video_ifm.RGB <= 24'hffffff ; 
         end
-        else if ((((horizontal_counter-HFP + HPULSE + HBP - 1))) & 4'hf == 15) begin
+        else if (((horizontal_counter-(HFP + HPULSE + HBP - 1)) & 4'hf) == 15 && horizontal_counter > (HFP + HPULSE + HBP - 1)  ) begin
             video_ifm.RGB <= 24'hffffff ;
         end
         else begin
