@@ -22,15 +22,12 @@ localparam Nbits_counter_H = $clog2( HFP + HPULSE + HBP + HDISP);
 localparam Nbits_counter_V = $clog2(  VFP + VPULSE + VBP + VDISP);
 
 // vertical and horizontal counters 
-logic [Nbits_counter_H-1:0] horizontal_counter;
-logic [Nbits_counter_V-1:0] vertical_counter  ;
+logic [Nbits_counter_H-1:0] horizontal_counter,x;
+logic [Nbits_counter_V-1:0] vertical_counter,y  ;
 
 // Clock atttachement 
 assign video_ifm.CLK = pixel_clk ;
 
-// coordonance for MIRE image
-localparam Nb_pixel_counter = 16;
-localparam Nb_ligne_counter = 16;
 
 
 // horizontal signal controls 
@@ -46,7 +43,7 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
             horizontal_counter <= 0 ; 
         end
         else begin
-            horizontal_counter <= horizontal_counter + 1 ;
+            horizontal_counter <= horizontal_counter + 1'b1 ;
         end
         
         //control of vertical counter
@@ -54,10 +51,7 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
             vertical_counter <= 0 ; 
         end
         else if (horizontal_counter == (HFP + HPULSE + HBP + HDISP -1)) begin
-            vertical_counter <= vertical_counter + 1 ;
-        end
-        else begin
-            vertical_counter <= vertical_counter ;
+            vertical_counter <= vertical_counter + 1'b1 ;
         end
 
     end
@@ -100,16 +94,21 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
     end
 end
 
+
+// creating coordinate
+assign x = horizontal_counter - (HFP + HPULSE + HBP - 1'b1);
+assign y = vertical_counter - (VFP + VPULSE + VBP - 1'b1) ;
+
 // MIRE image generation
 always_ff@(posedge pixel_clk or posedge pixel_rst)begin
     if (pixel_rst) begin
         video_ifm.RGB <= 0; 
     end
     else begin
-        if(((vertical_counter-(VFP + VPULSE + VBP - 1)) & 4'hf) == 15 && vertical_counter > (VFP + VPULSE + VBP - 1)) begin
+        if(x[3:0] == 15) begin
             video_ifm.RGB <= 24'hffffff ; 
         end
-        else if (((horizontal_counter-(HFP + HPULSE + HBP - 1)) & 4'hf) == 15 && horizontal_counter > (HFP + HPULSE + HBP - 1)  ) begin
+        else if (y[3:0]== 15) begin
             video_ifm.RGB <= 24'hffffff ;
         end
         else begin
@@ -117,17 +116,4 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
         end
     end
 end
-// this part is for module Top
-
-/*
- modport video_ifm.master video_ifm
-  vga #(
-        .HDISP(HDISP),
-        .VDISP(VDISP)
-    ) vga_inst (
-        .pixel_clk(pixel_clk),
-        .pixel_rst(pixel_rst),
-        .video_ifm(video_ifm)
-    );
-*/
 endmodule
