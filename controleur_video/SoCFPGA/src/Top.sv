@@ -76,19 +76,7 @@ assign avalon_if_sdram.byteenable = '0 ;
 //------- Code Eleves ------
 //--------------------------
 
-// instantiation of VGA module
 logic pixel_rst, ff1, ff2;
-
-
-vga #(.HDISP(HDISP),.VDISP(VDISP)) vga_inst (
-        .pixel_clk(pixel_clk),
-        .pixel_rst(pixel_rst),
-        .video_ifm(video_ifm),
-        .avalon_ifh(avalon_if_sdram)
-);
-
-
-
 
 `ifdef SIMULATION
   localparam periode_LED1 = 100;
@@ -145,6 +133,15 @@ always_ff @(posedge pixel_clk or posedge pixel_rst) begin
         counter2 <= counter2 + 1;
     end
 end
+
+// instantiation of VGA module
+
+vga #(.HDISP(HDISP),.VDISP(VDISP)) vga_inst (
+        .pixel_clk(pixel_clk),
+        .pixel_rst(pixel_rst),
+        .video_ifm(video_ifm),
+        .avalon_ifh(avalon_if_sdram)
+);
 
 endmodule
 `default_nettype wire
