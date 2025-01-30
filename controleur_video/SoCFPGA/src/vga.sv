@@ -118,33 +118,10 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
     end
 end
 
-// Code de test de l'interconnection avalon_sdram (non synthétisable)
-/*
-assign avalon_ifh.address = '0 ;             // Adresse fixe à 0
-assign avalon_ifh.burstcount = 6'h1 ;        // Transfert d'une donnée 
-assign avalon_ifh.writedata = 32'hBABECAFE ; // On écrit toujours la même chose
-assign avalon_ifh.byteenable = 4'hF ;        // On écrit tous les octets
-initial begin
-    {avalon_ifh.write, avalon_ifh.read} = 2'b00 ;
-    @(posedge avalon_ifh.reset) ;
-    @(negedge avalon_ifh.reset) ;
-    repeat(10) @(posedge avalon_ifh.clk) ;
-    avalon_ifh.write <= 1'b1 ;
-    @(posedge avalon_ifh.clk iff !avalon_ifh.waitrequest) ;
-    avalon_ifh.write <= 1'b0 ;
-    repeat(10) @(posedge avalon_ifh.clk) ;
-    avalon_ifh.read <= 1'b1 ;
-    @(posedge avalon_ifh.clk iff !avalon_ifh.waitrequest) ;
-    avalon_ifh.read <= 1'b0 ;
-    @(posedge avalon_ifh.readdatavalid) ;
-    repeat(10) @(posedge avalon_ifh.clk) ;
-    $stop() ;
-end
-// Fin du code de test
-*/
-
 //SDRAM access controler
 localparam BURSTSIZE = 16;
+
+logic walmost_full;
 
 assign avalon_ifh.write = 1'b0; // Read only
 assign avalon_ifh.byteenable = 4'h0; // Read only
@@ -171,8 +148,8 @@ begin
         avalon_ifh.read <= 1'b0;
         avalon_ifh.address <= 32'd0;
     end
-    else if (verification_counter == BURSTSIZE + 1 && !avalon_ifh.waitrequest) avalon_ifh.read <= 1'b1;
-    else if (verification_counter == BURSTSIZE && !avalon_ifh.waitrequest) begin
+    else if (verification_counter == BURSTSIZE + 1 && !avalon_ifh.waitrequest && !walmost_full) avalon_ifh.read <= 1'b1;
+    else if (verification_counter == BURSTSIZE && !avalon_ifh.waitrequest && !walmost_full) begin
         avalon_ifh.read <= 1'b1;
         if (avalon_ifh.address < MAX_ADDRESS) avalon_ifh.address <= avalon_ifh.address + BURSTSIZE * 4;
         else avalon_ifh.address <= 0;
@@ -182,5 +159,22 @@ begin
     end
 end
 
+// asynchronous FIFO
+localparam DATA_WIDTH = 32;
+localparam DEPTH_WIDTH = 8;
+localparam ALMOST_FULL_THRESHOLD = (1 << DEPTH_WIDTH) - BURSTSIZE - 1;
 
+
+async_fifo #(.DATA_WIDTH(DATA_WIDTH),.DEPTH_WIDTH(DEPTH_WIDTH),.ALMOST_FULL_THRESHOLD(ALMOST_FULL_THRESHOLD)) async_fifo_inst (
+        .rst(avalon_ifh.reset),
+        .rclk(pixel_clk),
+        .read(1'b0),
+        .rdata(),
+        .rempty(),
+        .wclk(avalon_ifh.clk),
+        .wdata(avalon_ifh.readdata),
+        .write(avalon_ifh.readdatavalid),
+        .wfull(),
+        .walmost_full(walmost_full)
+);
 endmodule
