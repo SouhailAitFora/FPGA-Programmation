@@ -17,10 +17,10 @@ localparam VPULSE = 3;
 localparam VBP = 29 ;   
 
 // Nb of bits of horizontal counter
-localparam Nbits_counter_H = $clog2( HFP + HPULSE + HBP + HDISP);
+localparam Nbits_counter_H = $clog2(HFP + HPULSE + HBP + HDISP);
 
 //Nb of bits of vertical counter
-localparam Nbits_counter_V = $clog2(  VFP + VPULSE + VBP + VDISP);
+localparam Nbits_counter_V = $clog2(VFP + VPULSE + VBP + VDISP);
 
 // vertical and horizontal counters 
 logic [Nbits_counter_H-1:0] horizontal_counter,x;
@@ -28,8 +28,6 @@ logic [Nbits_counter_V-1:0] vertical_counter,y  ;
 
 // Clock atttachement 
 assign video_ifm.CLK = pixel_clk ;
-
-
 
 // horizontal signal controls 
 always_ff@(posedge pixel_clk or posedge pixel_rst)begin
@@ -62,12 +60,12 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
     if (pixel_rst) begin
         video_ifm.VS    <= 1 ;
         video_ifm.HS    <= 1 ;
-        video_ifm.BLANK <=0 ;
+        video_ifm.BLANK <= 0 ;
     end
     else begin
         // control of HS signal
         if(horizontal_counter >=(HFP -1) && horizontal_counter < (HFP + HPULSE -1) )begin
-             video_ifm.HS    <= 0 ;    
+            video_ifm.HS    <= 0 ;    
         end
         else begin
             video_ifm.HS <= 1 ;
@@ -75,14 +73,14 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
 
         // control of VS signal 
         if(vertical_counter >=(VFP -1) && vertical_counter < (VFP + VPULSE -1) )begin
-             video_ifm.VS    <= 0 ;    
+            video_ifm.VS    <= 0 ;    
         end
         else begin
             video_ifm.VS <= 1 ;
         end
 
         // control of BLANK SIGNAL
-        if (horizontal_counter < (HFP + HPULSE + HBP - 1) || vertical_counter < (VFP + VPULSE + VBP - 1)   ) begin
+        if (horizontal_counter < (HFP + HPULSE + HBP - 1) || vertical_counter < (VFP + VPULSE + VBP - 1)) begin
             video_ifm.BLANK  <= 0 ;  
         end
         else if (horizontal_counter == (HFP + HPULSE + HBP + HDISP -1)||vertical_counter == (VFP + VPULSE + VBP + VDISP -1) ) begin
@@ -94,8 +92,7 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
 
     end
 end
-
-
+/*
 // creating coordinate
 assign x = horizontal_counter - (HFP + HPULSE + HBP - 1'b1);
 assign y = vertical_counter - (VFP + VPULSE + VBP - 1'b1) ;
@@ -117,6 +114,7 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
         end
     end
 end
+*/
 
 //SDRAM access controler
 localparam BURSTSIZE = 16;
@@ -164,12 +162,20 @@ localparam DATA_WIDTH = 32;
 localparam DEPTH_WIDTH = 8;
 localparam ALMOST_FULL_THRESHOLD = (1 << DEPTH_WIDTH) - BURSTSIZE - 1;
 
+logic enable_read;
+
+always_ff@(posedge pixel_clk or posedge pixel_rst) begin
+    if (pixel_rst) begin
+        enable_read <= 0;
+    end
+    else if (walmost_full && video_ifm.BLANK) enable_read <= 1;
+end
 
 async_fifo #(.DATA_WIDTH(DATA_WIDTH),.DEPTH_WIDTH(DEPTH_WIDTH),.ALMOST_FULL_THRESHOLD(ALMOST_FULL_THRESHOLD)) async_fifo_inst (
         .rst(avalon_ifh.reset),
         .rclk(pixel_clk),
-        .read(1'b0),
-        .rdata(),
+        .read(video_ifm.BLANK && enable_read),
+        .rdata(video_ifm.RGB),
         .rempty(),
         .wclk(avalon_ifh.clk),
         .wdata(avalon_ifh.readdata),
@@ -177,4 +183,5 @@ async_fifo #(.DATA_WIDTH(DATA_WIDTH),.DEPTH_WIDTH(DEPTH_WIDTH),.ALMOST_FULL_THRE
         .wfull(),
         .walmost_full(walmost_full)
 );
+
 endmodule
