@@ -94,8 +94,6 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
 end
 /*
 // creating coordinate
-assign x = horizontal_counter - (HFP + HPULSE + HBP - 1'b1);
-assign y = vertical_counter - (VFP + VPULSE + VBP - 1'b1) ;
 
 // MIRE image generation
 always_ff@(posedge pixel_clk or posedge pixel_rst)begin
@@ -117,6 +115,10 @@ end
 */
 
 //SDRAM access controler
+
+assign x = horizontal_counter - (HFP + HPULSE + HBP - 1'b1);
+assign y = vertical_counter - (VFP + VPULSE + VBP - 1'b1) ;
+
 localparam BURSTSIZE = 16;
 
 logic walmost_full;
@@ -149,7 +151,7 @@ begin
     else if (verification_counter == BURSTSIZE + 1 && !avalon_ifh.waitrequest && !walmost_full) avalon_ifh.read <= 1'b1;
     else if (verification_counter == BURSTSIZE && !avalon_ifh.waitrequest && !walmost_full) begin
         avalon_ifh.read <= 1'b1;
-        if (avalon_ifh.address < MAX_ADDRESS) avalon_ifh.address <= avalon_ifh.address + BURSTSIZE * 4;
+        if (avalon_ifh.address < MAX_ADDRESS - (BURSTSIZE * 4)) avalon_ifh.address <= avalon_ifh.address + BURSTSIZE * 4;
         else avalon_ifh.address <= 0;
     end
     else if (avalon_ifh.read) begin
