@@ -94,6 +94,8 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
 end
 /*
 // creating coordinate
+assign x = horizontal_counter - (HFP + HPULSE + HBP - 1'b1);
+assign y = vertical_counter - (VFP + VPULSE + VBP - 1'b1) ;
 
 // MIRE image generation
 always_ff@(posedge pixel_clk or posedge pixel_rst)begin
@@ -115,14 +117,9 @@ end
 */
 
 //SDRAM access controler
-
-assign x = horizontal_counter - (HFP + HPULSE + HBP - 1'b1);
-assign y = vertical_counter - (VFP + VPULSE + VBP - 1'b1) ;
-
 localparam BURSTSIZE = 16;
 
 logic walmost_full;
-logic waitrequest_toggle;
 
 assign avalon_ifh.write = 1'b0; // Read only
 assign avalon_ifh.byteenable = 4'h0; // Read only
@@ -130,66 +127,35 @@ assign avalon_ifh.burstcount = BURSTSIZE; // We use a constant burstcount
 
 // data red verification
 int verification_counter;
-// control of verification counter address
+
 always_ff@(posedge avalon_ifh.clk or posedge avalon_ifh.reset)
 begin
     if (avalon_ifh.reset) begin
-        verification_counter <= 0;
+        verification_counter <= BURSTSIZE + 1;
     end
-    else if (verification_counter == BURSTSIZE ) verification_counter <= 0;
+    else if (avalon_ifh.read) verification_counter <= 0;
     else if (avalon_ifh.readdatavalid) verification_counter <= verification_counter + 1;
 end
 
-localparam MAX_ADDRESS = 4 * HDISP * VDISP ;
+localparam MAX_ADDRESS = 4 * HDISP * VDISP;
 
-// control of read signal
+// read signal and address counter
 always_ff@(posedge avalon_ifh.clk or posedge avalon_ifh.reset)
 begin
     if (avalon_ifh.reset) begin
         avalon_ifh.read <= 1'b0;
-    end
-    else if (verification_counter == 0 && !avalon_ifh.waitrequest && !waitrequest_toggle && !walmost_full) avalon_ifh.read <= 1'b1;
-    else  avalon_ifh.read <= 1'b0;
-end
-
-logic waitrequest_togglable; 
-// toggle wait request
-always_ff @(posedge avalon_ifh.clk  or posedge avalon_ifh.reset) begin
-    if (avalon_ifh.reset) begin
-        waitrequest_toggle <= 1'b0;
-    end
-    else if (avalon_ifh.waitrequest && waitrequest_togglable) begin
-        waitrequest_toggle <= 1'b1;
-    end
-    else if (verification_counter == BURSTSIZE) begin 
-        waitrequest_toggle <= 1'b0;
-    end
-
-end
-always_ff @(posedge avalon_ifh.clk or posedge avalon_ifh.reset) begin
-    if (avalon_ifh.reset) begin
-        waitrequest_togglable <= 0;
-    end
-    if (avalon_ifh.read) begin
-        waitrequest_togglable <= 1;
-    end
-
-end
-
-//control of read address value
-always_ff @(posedge avalon_ifh.clk or posedge avalon_ifh.reset) begin
-    if (avalon_ifh.reset) begin
         avalon_ifh.address <= 32'd0;
     end
-    else if (verification_counter == BURSTSIZE && avalon_ifh.address < MAX_ADDRESS) begin
-        avalon_ifh.address <= avalon_ifh.address + BURSTSIZE * 4;
+    else if (verification_counter == BURSTSIZE + 1 && !avalon_ifh.waitrequest && !walmost_full) avalon_ifh.read <= 1'b1;
+    else if (verification_counter == BURSTSIZE && !avalon_ifh.waitrequest && !walmost_full) begin
+        avalon_ifh.read <= 1'b1;
+        if (avalon_ifh.address < MAX_ADDRESS - 4 * BURSTSIZE) avalon_ifh.address <= avalon_ifh.address + BURSTSIZE * 4;
+        else avalon_ifh.address <= 0;
     end
-    else if (avalon_ifh.address == MAX_ADDRESS) begin
-        avalon_ifh.address <= 0;
+    else if (avalon_ifh.read && !avalon_ifh.waitrequest) begin
+        avalon_ifh.read <= 1'b0;
     end
-
 end
-
 
 // asynchronous FIFO
 localparam DATA_WIDTH = 32;
