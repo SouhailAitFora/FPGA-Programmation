@@ -148,32 +148,30 @@ begin
     if (avalon_ifh.reset) begin
         avalon_ifh.read <= 1'b0;
     end
-    else if (verification_counter == 0 && (!avalon_ifh.waitrequest && !waitrequest_toggle) &&!walmost_full) avalon_ifh.read <= 1'b1;
-    else  begin
-        avalon_ifh.read <= 1'b0;
-    end
+    else if (verification_counter == 0 && !avalon_ifh.waitrequest && !waitrequest_toggle && !walmost_full) avalon_ifh.read <= 1'b1;
+    else  avalon_ifh.read <= 1'b0;
 end
 
-logic read ; 
+logic waitrequest_togglable; 
 // toggle wait request
 always_ff @(posedge avalon_ifh.clk  or posedge avalon_ifh.reset) begin
     if (avalon_ifh.reset) begin
         waitrequest_toggle <= 1'b0;
     end
-    else if (avalon_ifh.waitrequest && read) begin
-        waitrequest_toggle <=1;
+    else if (avalon_ifh.waitrequest && waitrequest_togglable) begin
+        waitrequest_toggle <= 1'b1;
     end
-    else if (verification_counter == BURSTSIZE ) begin 
+    else if (verification_counter == BURSTSIZE) begin 
         waitrequest_toggle <= 1'b0;
     end
 
 end
 always_ff @(posedge avalon_ifh.clk or posedge avalon_ifh.reset) begin
     if (avalon_ifh.reset) begin
-        read <= 0;
+        waitrequest_togglable <= 0;
     end
     if (avalon_ifh.read) begin
-        read <= 1 ;
+        waitrequest_togglable <= 1;
     end
 
 end
@@ -187,7 +185,7 @@ always_ff @(posedge avalon_ifh.clk or posedge avalon_ifh.reset) begin
         avalon_ifh.address <= avalon_ifh.address + BURSTSIZE * 4;
     end
     else if (avalon_ifh.address == MAX_ADDRESS) begin
-        avalon_ifh.address <= 0 ;
+        avalon_ifh.address <= 0;
     end
 
 end
