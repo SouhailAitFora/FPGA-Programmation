@@ -26,7 +26,7 @@ localparam Nbits_counter_V = $clog2(VFP + VPULSE + VBP + VDISP);
 logic [Nbits_counter_H-1:0] horizontal_counter,x;
 logic [Nbits_counter_V-1:0] vertical_counter,y  ;
 logic read;
-logic vertical_blank;
+logic vertical_blank, horizontal_blank;
 
 // Clock atttachement 
 assign video_ifm.CLK = pixel_clk ;
@@ -36,7 +36,8 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
     if (pixel_rst) begin
         video_ifm.VS    <= 1 ;
         video_ifm.HS    <= 1 ;
-        video_ifm.BLANK <= 0 ;
+        vertical_blank <= 0;
+        horizontal_blank <= 0 ;
         horizontal_counter <= 0 ;
         vertical_counter   <= 0 ;
     end
@@ -58,14 +59,14 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
         end
 
         // control of BLANK SIGNAL
-        if (horizontal_counter < (HFP + HPULSE + HBP - 1) || vertical_counter < (VFP + VPULSE + VBP - 1)) begin
-            video_ifm.BLANK  <= 0 ;  
+        if (horizontal_counter < (HFP + HPULSE + HBP - 1)) begin
+            horizontal_blank  <= 0 ;  
         end
-        else if (horizontal_counter == (HFP + HPULSE + HBP + HDISP -1)||vertical_counter == (VFP + VPULSE + VBP + VDISP -1) ) begin
-            video_ifm.BLANK  <= 0 ; 
+        else if (horizontal_counter == (HFP + HPULSE + HBP + HDISP -1)) begin
+            horizontal_blank  <= 0 ; 
         end
         else begin
-            video_ifm.BLANK <= 1 ;
+            horizontal_blank <= 1 ;
         end
 
         // control of vertical BLANK SIGNAL
@@ -98,6 +99,8 @@ always_ff@(posedge pixel_clk or posedge pixel_rst)begin
 
     end
 end
+
+assign video_ifm.BLANK = vertical_blank && horizontal_blank;
 
 // creating coordinate
 assign x = horizontal_counter - (HFP + HPULSE + HBP - 1'b1);
