@@ -8,21 +8,13 @@ module avalon_intercon #(parameter  HDISP  = 800, VDISP  = 480 ) (
     avalon_if.host  avalon_ifh_sdram
     );
 
-
-int counter_write_sdram ;
-logic sel_vga,vga_busy,not_finish ;
-logic [4:0] busy_counter;
-//
-logic sdram_full ; 
-
-// signal selection between vga or processor
-assign sel_vga = vga_busy ;
+logic sel_vga;
 
 // signals to stop writing in sdram
-assign avalon_if_stream.waitrequest = sel_vga || (sdram_full && (counter_write_sdram == 16)) ;
-assign avalon_if_stream.readdata = '0 ;
+assign avalon_ifa_stream.waitrequest = sel_vga ? 1 : avalon_ifh_sdram.waitrequest;
+assign avalon_ifa_stream.readdata = 'b0;
 
-// connecting the output of the avalon host of th vga to the agent input of sdram
+// connecting the output of the avalon host of the vga to the agent input of sdram
 assign  avalon_ifh_sdram.write       = sel_vga ? avalon_ifa_vga.write      : avalon_ifa_stream.write       ;
 assign  avalon_ifh_sdram.byteenable  = sel_vga ? avalon_ifa_vga.byteenable : avalon_ifa_stream.byteenable  ;
 assign  avalon_ifh_sdram.burstcount  = sel_vga ? avalon_ifa_vga.burstcount : avalon_if_stream.burstcount   ;
@@ -30,59 +22,71 @@ assign  avalon_ifh_sdram.read        = sel_vga ? avalon_ifa_vga.read       : ava
 assign  avalon_ifh_sdram.address     = sel_vga ? avalon_ifa_vga.address    : avalon_if_stream.address      ;
 assign  avalon_ifh_sdram.writedata   = sel_vga ? avalon_ifa_vga.writedata  : avalon_if_stream.writedata    ;
 
-// connecting the input of the avalon host of th vga to the agent output of sdram
+// connecting the input of the avalon host of the vga to the agent output of sdram
 assign  avalon_ifa_vga.readdata      = avalon_ifh_sdram.readdata       ;
 assign  avalon_ifa_vga.readdatavalid = avalon_ifh_sdram.readdatavalid  ;  
-assign  avalon_ifa_vga.waitrequest   = avalon_ifh_sdram.waitrequest || !sdram_full ;
+assign  avalon_ifa_vga.waitrequest   = sel_vga ? avalon_ifh_sdram.waitrequest : 1;
 
 // flag to indicate that the VGA is working on sdram
-assign vga_busy = avalon_ifa_vga.read  ||  not_finish ;
+logic [4:0] reading_counter;
+logic vga_busy, not_finish_reading;
+logic [avalon_ifa_stream.BURSTCOUNT_W - 1:0] toggled_read_burstcount;
+
+assign vga_busy = (avalon_ifa_vga.read && sel_vga) || not_finish_reading ;
 
 // vga_busy signal control
 always_ff @(posedge clk or posedge rst) begin
     if (rst) begin
-        busy_counter <= avalon_ifa_vga.burstcount + 1 ; 
-        not_finish <= 0;
+        reading_counter <= 5'b0; 
+        not_finish_reading <= 1'b0;
     end
     else begin
-        if (avalon_ifa_vga.read) busy_counter <=0;
-        else if (avalon_ifh_sdram.readdatavalid) busy_counter <= busy_counter + 1'b1 ;
+        if (avalon_ifa_vga.read) reading_counter <= 5'b0;
+        else if (avalon_ifh_sdram.readdatavalid) reading_counter <= reading_counter + 5'b1;
 
-        if (avalon_ifa_vga.read ) not_finish <= 1'b1 ;
-        else if (busy_counter == avalon_ifa_vga.burstcount) not_finish <= 1'b0;
+        if (avalon_ifa_vga.read && sel_vga) not_finish_reading <= 1'b1;
+        else if (reading_counter == toggled_read_burstcount && not_finish_reading) not_finish_reading <= 1'b0;
+
+        if (avalon_ifa_vga.read) toggled_read_burstcount <= avalon_ifa_vga.burstcount;
     end
 end
 
-// counter of how much the sdram is full
-int counter_sdram;
+// flag to indicate that the processor is working on sdram
+logic [4:0] writing_counter;
+logic stream_busy, not_finish_writing;
+logic [avalon_ifa_stream.BURSTCOUNT_W - 1:0] toggled_write_burstcount;
 
-// size of sdram (display zone )
-localparam size = HDISP * VDISP ;
+assign stream_busy = ((avalon_ifa_stream.write && !sel_vga) || not_finish_writing) && !(writing_counter == toggled_write_burstcount);
 
-// control signals that prouve that sdram is full
-always_ff @(posedge clk or posedge rst) begin
-    if(rst) begin
-        sdram_full <= 0   ;
-        counter_sdram <= 0;
-    end
-    else begin
-        if (counter_sdram == size ) begin
-            sdram_full <= 1 ;
-        end
-        if(counter_sdram == size) counter_sdram <= 0 ;
-        else if (!sdram_full && avalon_ifa_stream.write ) counter_sdram <= 1 + counter_sdram ;
-    end
-end
-
-// signals that controls the fact of  writing 16 pixels 
+// vga_busy signal control
 always_ff @(posedge clk or posedge rst) begin
     if (rst) begin
-        counter_write_sdram <= 0 ;
+        writing_counter <= 5'b0;
+        not_finish_writing <= 1'b0;
     end
     else begin
-        if (avalon_ifa_vga.read) counter_write_sdram <= 0 ;
-        else if (avalon_ifa_stream.write)  counter_write_sdram <= counter_write_sdram + 1 ;
+        if (writing_counter == toggled_write_burstcount) writing_counter <= 5'b0;
+        else if (avalon_ifa_stream.write) writing_counter <= writing_counter + 5'b1;
+
+        if (avalon_ifa_stream.write && !sel_vga) not_finish_writing <= 1'b1;
+        else if (writing_counter == toggled_write_burstcount && not_finish_writing) not_finish_writing <= 1'b0;
+
+        if (avalon_ifa_stream.write && writing_counter == 0) toggled_write_burstcount <= avalon_ifa_stream.burstcount;
+    end
+end
+
+always_ff @(posedge clk or posedge rst) begin
+    if(rst)begin
+        sel_vga <= 1;
+    end
+    else begin
+        if(!vga_busy && sel_vga)begin
+            sel_vga <= 0;
         end
+        else if (vga_busy && !stream_busy && !sel_vga) begin
+            sel_vga <= 1;
+        end
+    end
 end
 
 endmodule
