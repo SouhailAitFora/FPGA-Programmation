@@ -41,7 +41,7 @@ always_ff @(posedge clk or posedge rst) begin
         not_finish_reading <= 1'b0;
     end
     else begin
-        if (avalon_ifa_vga.read) reading_counter <= 5'b0;
+        if (avalon_ifa_vga.read ) reading_counter <= 5'b0;
         else if (avalon_ifh_sdram.readdatavalid) reading_counter <= reading_counter + 5'b1;
 
         if (avalon_ifa_vga.read && sel_vga) not_finish_reading <= 1'b1;
@@ -75,15 +75,18 @@ always_ff @(posedge clk or posedge rst) begin
     end
 end
 
+logic begining ;
 always_ff @(posedge clk or posedge rst) begin
     if(rst)begin
         sel_vga <= 1;
+        begining <=0 ;
     end
     else begin
-        if(!vga_busy && sel_vga)begin
+        if (!begining) begining <= 1 ;
+        if(!vga_busy &&sel_vga && begining)begin
             sel_vga <= 0;
         end
-        else if (vga_busy && !stream_busy && !sel_vga) begin
+        else if (!vga_busy && !stream_busy && !sel_vga && begining) begin
             sel_vga <= 1;
         end
     end
