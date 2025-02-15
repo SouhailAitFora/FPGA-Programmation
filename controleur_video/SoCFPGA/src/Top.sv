@@ -145,7 +145,7 @@ vga #(.HDISP(HDISP),.VDISP(VDISP)) vga_inst (
         .avalon_ifh(avalon_if_vga)
 );
 
-avalon_intercon #(.HDISP(HDISP),.VDISP(VDISP)) avalon_intercon0(
+avalon_intercon avalon_intercon0(
                                 .clk(sys_clk),
                                 .rst(sys_rst),
                                 .avalon_ifa_vga(avalon_if_vga),

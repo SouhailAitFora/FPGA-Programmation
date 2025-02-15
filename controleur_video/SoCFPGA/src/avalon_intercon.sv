@@ -1,4 +1,4 @@
-module avalon_intercon #(parameter  HDISP  = 800, VDISP  = 480 ) (
+module avalon_intercon(
     input logic clk,
     input logic rst,
       
@@ -17,10 +17,10 @@ assign avalon_ifa_stream.readdata = 'b0;
 // connecting the output of the avalon host of the vga to the agent input of sdram
 assign  avalon_ifh_sdram.write       = sel_vga ? avalon_ifa_vga.write      : avalon_ifa_stream.write       ;
 assign  avalon_ifh_sdram.byteenable  = sel_vga ? avalon_ifa_vga.byteenable : avalon_ifa_stream.byteenable  ;
-assign  avalon_ifh_sdram.burstcount  = sel_vga ? avalon_ifa_vga.burstcount : avalon_if_stream.burstcount   ;
-assign  avalon_ifh_sdram.read        = sel_vga ? avalon_ifa_vga.read       : avalon_if_stream.read         ;
-assign  avalon_ifh_sdram.address     = sel_vga ? avalon_ifa_vga.address    : avalon_if_stream.address      ;
-assign  avalon_ifh_sdram.writedata   = sel_vga ? avalon_ifa_vga.writedata  : avalon_if_stream.writedata    ;
+assign  avalon_ifh_sdram.burstcount  = sel_vga ? avalon_ifa_vga.burstcount : avalon_ifa_stream.burstcount   ;
+assign  avalon_ifh_sdram.read        = sel_vga ? avalon_ifa_vga.read       : avalon_ifa_stream.read         ;
+assign  avalon_ifh_sdram.address     = sel_vga ? avalon_ifa_vga.address    : avalon_ifa_stream.address      ;
+assign  avalon_ifh_sdram.writedata   = sel_vga ? avalon_ifa_vga.writedata  : avalon_ifa_stream.writedata    ;
 
 // connecting the input of the avalon host of the vga to the agent output of sdram
 assign  avalon_ifa_vga.readdata      = avalon_ifh_sdram.readdata       ;
@@ -30,7 +30,7 @@ assign  avalon_ifa_vga.waitrequest   = sel_vga ? avalon_ifh_sdram.waitrequest : 
 // flag to indicate that the VGA is working on sdram
 logic [4:0] reading_counter;
 logic vga_busy, not_finish_reading;
-logic [avalon_ifa_stream.BURSTCOUNT_W - 1:0] toggled_read_burstcount;
+int toggled_read_burstcount;
 
 assign vga_busy = (avalon_ifa_vga.read) || not_finish_reading ;
 
@@ -52,9 +52,10 @@ always_ff @(posedge clk or posedge rst) begin
 end
 
 // flag to indicate that the processor is working on sdram
+
 logic [4:0] writing_counter;
 logic stream_busy, not_finish_writing;
-logic [avalon_ifa_stream.BURSTCOUNT_W - 1:0] toggled_write_burstcount;
+int toggled_write_burstcount;
 
 assign stream_busy = ((avalon_ifa_stream.write) || not_finish_writing) && !(writing_counter == toggled_write_burstcount);
 

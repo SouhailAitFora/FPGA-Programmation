@@ -102,30 +102,6 @@ end
 
 assign video_ifm.BLANK = vertical_blank && horizontal_blank;
 
-// creating coordinate
-assign x = horizontal_counter - (HFP + HPULSE + HBP - 1'b1);
-assign y = vertical_counter - (VFP + VPULSE + VBP - 1'b1) ;
-
-/*
-// MIRE image generation
-always_ff@(posedge pixel_clk or posedge pixel_rst)begin
-    if (pixel_rst) begin
-        video_ifm.RGB <= 0; 
-    end
-    else begin
-        if(x[3:0] == 15) begin
-            video_ifm.RGB <= 24'hffffff ; 
-        end
-        else if (y[3:0]== 15) begin
-            video_ifm.RGB <= 24'hffffff ;
-        end
-        else begin
-            video_ifm.RGB <= 0 ;
-        end
-    end
-end
-*/
-
 //SDRAM access controler
 
 localparam BURSTSIZE = 16;
