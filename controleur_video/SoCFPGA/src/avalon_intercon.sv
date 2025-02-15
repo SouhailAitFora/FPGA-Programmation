@@ -28,7 +28,7 @@ assign  avalon_ifa_vga.readdatavalid = avalon_ifh_sdram.readdatavalid  ;
 assign  avalon_ifa_vga.waitrequest   = sel_vga ? avalon_ifh_sdram.waitrequest : 1;
 
 // flag to indicate that the VGA is working on sdram
-logic [4:0] reading_counter;
+int reading_counter;
 logic vga_busy, not_finish_reading;
 int toggled_read_burstcount;
 
@@ -53,7 +53,7 @@ end
 
 // flag to indicate that the processor is working on sdram
 
-logic [4:0] writing_counter;
+int writing_counter;
 logic stream_busy, not_finish_writing;
 int toggled_write_burstcount;
 

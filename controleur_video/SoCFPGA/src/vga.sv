@@ -104,7 +104,7 @@ assign video_ifm.BLANK = vertical_blank && horizontal_blank;
 
 //SDRAM access controler
 
-localparam BURSTSIZE = 16;
+localparam BURSTSIZE = 32;
 logic walmost_full;
 
 assign avalon_ifh.write = 1'b0; // Read only
