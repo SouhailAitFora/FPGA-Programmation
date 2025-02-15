@@ -127,8 +127,8 @@ end
 */
 
 //SDRAM access controler
-localparam BURSTSIZE = 16;
 
+localparam BURSTSIZE = 16;
 logic walmost_full;
 
 assign avalon_ifh.write = 1'b0; // Read only
@@ -153,7 +153,7 @@ begin
         if (avalon_ifh.read) verification_counter <= 0;
         else if (avalon_ifh.readdatavalid) verification_counter <= verification_counter + 1;
 
-        if (verification_counter == BURSTSIZE + 1 && !walmost_full && !avalon_ifh.read) avalon_ifh.read <= 1'b1;
+        if (verification_counter == BURSTSIZE + 1 && !walmost_full && !avalon_ifh.read && !avalon_ifh.waitrequest) avalon_ifh.read <= 1'b1;
         else if (verification_counter == BURSTSIZE && !walmost_full && !avalon_ifh.read) begin
             avalon_ifh.read <= 1'b1;
             if (avalon_ifh.address < MAX_ADDRESS - 4 * BURSTSIZE) avalon_ifh.address <= avalon_ifh.address + BURSTSIZE * 4;

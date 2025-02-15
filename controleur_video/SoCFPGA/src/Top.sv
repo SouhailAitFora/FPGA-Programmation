@@ -36,6 +36,7 @@ sys_pll  sys_pll_inst(
 //=============================
 avalon_if #( .DATA_BYTES(4)) avalon_if_sdram  (sys_clk, sys_rst);
 avalon_if #( .DATA_BYTES(4)) avalon_if_stream (sys_clk, sys_rst);
+avalon_if #( .DATA_BYTES(4)) avalon_if_vga (sys_clk, sys_rst);
 
 
 //=============================
@@ -55,9 +56,10 @@ hw_support hw_support_inst (
 // du flux video pour l'instant
 //TODO A SUPPRIMER PLUS TARD
 //=============================
+/*
 assign avalon_if_stream.waitrequest = 1'b1;
 assign avalon_if_stream.readdata = '0 ;
-
+*/
 
 //=============================
 // On neutralise l'interface SDRAM
@@ -140,8 +142,15 @@ vga #(.HDISP(HDISP),.VDISP(VDISP)) vga_inst (
         .pixel_clk(pixel_clk),
         .pixel_rst(pixel_rst),
         .video_ifm(video_ifm),
-        .avalon_ifh(avalon_if_sdram)
+        .avalon_ifh(avalon_if_vga)
 );
+
+avalon_intercon #(.HDISP(HDISP),.VDISP(VDISP)) avalon_intercon0(
+                                .clk(sys_clk),
+                                .rst(sys_rst),
+                                .avalon_ifa_vga(avalon_if_vga),
+                                .avalon_ifa_stream(avalon_if_stream),
+                                .avalon_ifh_sdram(avalon_if_sdram));
 
 endmodule
 `default_nettype wire
