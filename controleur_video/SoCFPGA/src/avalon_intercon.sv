@@ -32,7 +32,7 @@ logic [4:0] reading_counter;
 logic vga_busy, not_finish_reading;
 logic [avalon_ifa_stream.BURSTCOUNT_W - 1:0] toggled_read_burstcount;
 
-assign vga_busy = (avalon_ifa_vga.read && sel_vga) || not_finish_reading ;
+assign vga_busy = (avalon_ifa_vga.read) || not_finish_reading ;
 
 // vga_busy signal control
 always_ff @(posedge clk or posedge rst) begin
@@ -41,10 +41,10 @@ always_ff @(posedge clk or posedge rst) begin
         not_finish_reading <= 1'b0;
     end
     else begin
-        if (avalon_ifa_vga.read ) reading_counter <= 5'b0;
+        if (avalon_ifa_vga.read) reading_counter <= 5'b0;
         else if (avalon_ifh_sdram.readdatavalid) reading_counter <= reading_counter + 5'b1;
 
-        if (avalon_ifa_vga.read && sel_vga) not_finish_reading <= 1'b1;
+        if (avalon_ifa_vga.read) not_finish_reading <= 1'b1;
         else if (reading_counter == toggled_read_burstcount && not_finish_reading) not_finish_reading <= 1'b0;
 
         if (avalon_ifa_vga.read) toggled_read_burstcount <= avalon_ifa_vga.burstcount;
@@ -56,7 +56,7 @@ logic [4:0] writing_counter;
 logic stream_busy, not_finish_writing;
 logic [avalon_ifa_stream.BURSTCOUNT_W - 1:0] toggled_write_burstcount;
 
-assign stream_busy = ((avalon_ifa_stream.write && !sel_vga) || not_finish_writing) && !(writing_counter == toggled_write_burstcount);
+assign stream_busy = ((avalon_ifa_stream.write) || not_finish_writing) && !(writing_counter == toggled_write_burstcount);
 
 // vga_busy signal control
 always_ff @(posedge clk or posedge rst) begin
@@ -66,27 +66,24 @@ always_ff @(posedge clk or posedge rst) begin
     end
     else begin
         if (writing_counter == toggled_write_burstcount) writing_counter <= 5'b0;
-        else if (avalon_ifa_stream.write) writing_counter <= writing_counter + 5'b1;
+        else if (avalon_ifa_stream.write && !avalon_ifa_stream.waitrequest) writing_counter <= writing_counter + 5'b1;
 
-        if (avalon_ifa_stream.write && !sel_vga) not_finish_writing <= 1'b1;
+        if (avalon_ifa_stream.write) not_finish_writing <= 1'b1;
         else if (writing_counter == toggled_write_burstcount && not_finish_writing) not_finish_writing <= 1'b0;
 
         if (avalon_ifa_stream.write && writing_counter == 0) toggled_write_burstcount <= avalon_ifa_stream.burstcount;
     end
 end
 
-logic begining ;
 always_ff @(posedge clk or posedge rst) begin
     if(rst)begin
         sel_vga <= 1;
-        begining <=0 ;
     end
     else begin
-        if (!begining) begining <= 1 ;
-        if(!vga_busy &&sel_vga && begining)begin
+        if(!vga_busy && sel_vga)begin
             sel_vga <= 0;
         end
-        else if (!vga_busy && !stream_busy && !sel_vga && begining) begin
+        else if (vga_busy && !stream_busy && !sel_vga) begin
             sel_vga <= 1;
         end
     end
