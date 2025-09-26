@@ -97,4 +97,4 @@ make program
 
 ## Project GIF
 
-![GIF showing video on the DE10‑Nano](se203-gif.gif)
+![GIF showing video on the DE10‑Nano](se204-gif.gif)
